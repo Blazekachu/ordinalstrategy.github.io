@@ -142,6 +142,26 @@
       .hero h2 { font-size: 1.6rem; }
       #progress-container { right: 10px; width: 6px; }
     }
+    /* ===== Live Bitcoin Data (Block + Mempool) ===== */
+#live-data {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  color: #f7931a;
+  font-weight: 600;
+  font-size: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin-top: 10px;
+  box-shadow: 0 0 10px #f7931a44;
+}
+
+#live-data span {
+  display: inline-block;
+}
   </style>
 </head>
 <body>
@@ -158,6 +178,11 @@
       <a href="#team">Team</a>
       <a href="#community">Community</a>
     </nav>
+      <div id="live-data">
+    <span>🟠 Block: <span id="block-height">--</span></span>
+    <span>Txns in Mempool: <span id="mempool-count">--</span></span>
+    <span>Avg Fee: <span id="avg-fee">--</span> sats/vB</span>
+  </div>
   </header>
 
   <!-- progress bar + rocket -->
@@ -271,6 +296,70 @@
     });
 
     setTimeout(updateAll, 160);
+  
+  // === Live Bitcoin Data from mempool.space ===
+const blockElem = document.getElementById('block-height');
+const mempoolElem = document.getElementById('mempool-count');
+const avgFeeElem = document.getElementById('avg-fee');
+
+// Fetch once using REST
+async function fetchSnapshot() {
+  try {
+    const [blocksResp, mempoolResp] = await Promise.all([
+      fetch('https://mempool.space/api/blocks'),
+      fetch('https://mempool.space/api/mempool')
+    ]);
+
+    const blocks = await blocksResp.json();
+    const mempool = await mempoolResp.json();
+
+    if (blocks && blocks[0]) blockElem.textContent = blocks[0].height;
+    if (mempool && mempool.count) mempoolElem.textContent = mempool.count.toLocaleString();
+    if (mempool && mempool.vbytes_per_fee) {
+      avgFeeElem.textContent = Math.round(mempool.vbytes_per_fee['1'] || 0);
+    }
+  } catch (err) {
+    console.error('REST fetch error:', err);
+  }
+}
+
+// Connect WebSocket
+function connectWS() {
+  const ws = new WebSocket('wss://mempool.space/api/v1/ws');
+
+  ws.onopen = () => {
+    console.log('Mempool WS connected');
+    ws.send(JSON.stringify({ action: "want", data: ["blocks", "mempool-blocks"] }));
+  };
+
+  ws.onmessage = (msg) => {
+    try {
+      const data = JSON.parse(msg.data);
+
+      if (data.block) {
+        blockElem.textContent = data.block.height;
+      }
+
+      if (data.mempoolInfo) {
+        mempoolElem.textContent = data.mempoolInfo.count.toLocaleString();
+        avgFeeElem.textContent = Math.round(data.mempoolInfo.vbytes_per_fee['1'] || 0);
+      }
+
+    } catch (e) {
+      console.warn('WS parse issue:', e);
+    }
+  };
+
+  ws.onclose = () => {
+    console.log('Mempool WS closed — reconnecting in 5s');
+    setTimeout(connectWS, 5000);
+  };
+}
+
+// Initialize
+fetchSnapshot();
+connectWS();
+setInterval(fetchSnapshot, 60000); // backup refresh every 60s
   })();
   </script>
 </body>
