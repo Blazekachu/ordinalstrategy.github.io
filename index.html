@@ -131,6 +131,37 @@
       .hero h2 { font-size: 1.6rem; }
       #progress-container { right: 10px; width:6px; }
     }
+    /* ===== Floating "scroll up" rocket ===== */
+#scroll-rocket {
+  position: fixed;
+  bottom: 100px;
+  right: 60px;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  z-index: 10001;
+  animation: rocketFloat 3s ease-in-out infinite;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  opacity: 0.9;
+}
+
+#scroll-rocket img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px #f7931a);
+}
+
+#scroll-rocket:hover {
+  transform: translateY(-6px) scale(1.1);
+  opacity: 1;
+}
+
+@keyframes rocketFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
   </style>
 </head>
 <body>
@@ -212,6 +243,11 @@
       </div>
     </section>
   </div>
+  
+<!-- Floating scroll-up rocket -->
+<div id="scroll-rocket">
+  <img src="rocket.png" alt="Scroll Up Rocket">
+</div>
 
   <script>
     (function () {
@@ -268,6 +304,19 @@
 
       // initialize progress immediately if content already loaded
       updateProgress();
+      // === Floating rocket scroll-up control ===
+const rocket = document.getElementById('scroll-rocket');
+const siteContainer = document.getElementById('site');
+
+rocket.addEventListener('click', () => {
+  siteContainer.scrollBy({ top: -window.innerHeight, behavior: 'smooth' });
+});
+
+// hide rocket near bottom
+siteContainer.addEventListener('scroll', () => {
+  const atBottom = siteContainer.scrollTop > siteContainer.scrollHeight - siteContainer.clientHeight - 50;
+  rocket.style.opacity = atBottom ? 0.4 : 0.9;
+});
     })();
   </script>
 </body>
