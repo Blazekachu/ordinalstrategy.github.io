@@ -90,37 +90,39 @@
     .socials a:hover{background:#fff}
     footer{background:#090a0d;text-align:center;padding:40px 10px;color:#888;font-size:.95rem}
 
-/* --- Progress bar (right side, bottom→top fill + glow) --- */
-#progress {
+/* ===== FIXED RIGHT PROGRESS BAR WITH GLOW ===== */
+#progress-container {
   position: fixed;
   top: 0;
-  right: 18px;
+  right: 20px;
   width: 8px;
   height: 100%;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   overflow: hidden;
   z-index: 9999;
   pointer-events: none;
+  transform: rotate(180deg); /* keeps direction consistent with rotated body */
 }
 
-#progress .fill {
+#progress-bar {
   position: absolute;
-  left: 0;
   bottom: 0;
+  left: 0;
   width: 100%;
   height: 2%;
   background: #f7931a;
-  box-shadow: 0 0 10px 2px #f7931a66;
   border-radius: 10px 10px 0 0;
-  transition: height 0.15s linear, box-shadow 0.3s ease;
+  box-shadow: 0 0 12px 3px #f7931a88;
+  animation: glowPulse 2s infinite;
+  transition: height 0.2s ease;
 }
 
-    /* glowing pulse animation */
-@keyframes pulseGlow {
+@keyframes glowPulse {
   0%, 100% { box-shadow: 0 0 10px 2px #f7931a66; }
-  50%      { box-shadow: 0 0 18px 4px #f7931aff; }
+  50% { box-shadow: 0 0 22px 5px #f7931aff; }
 }
+
 
     @media(max-width:720px){
       .logo img{height:160px}
@@ -131,10 +133,11 @@
   </style>
 </head>
 <body>
-<!-- Progress bar visible overlay -->
-<div id="progress">
-  <div class="fill"></div>
+<!-- Progress bar (fixed right side) -->
+<div id="progress-container">
+  <div id="progress-bar"></div>
 </div>
+
   <header>
     <div class="logo">
       <img src="osfun.png" alt="Ordinal Strategy Logo">
@@ -203,7 +206,7 @@
   </section>
 
 <script>
-  // === INITIAL LOAD (scroll to bottom) ===
+  // Auto-scroll to bottom on load (footer first)
   window.addEventListener('load', () => {
     setTimeout(() => {
       window.scrollTo(0, document.body.scrollHeight);
@@ -211,7 +214,7 @@
     }, 400);
   });
 
-  // === SMOOTH ANCHOR LINKS ===
+  // Smooth anchor scrolls
   document.querySelectorAll('a[href^="#"]').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -220,30 +223,22 @@
     });
   });
 
-  // === PROGRESS BAR ===
-  const fill = document.querySelector('#progress .fill');
+  // Progress bar logic (reverse scroll)
+  const bar = document.getElementById('progress-bar');
 
-function updateProgress() {
-  const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-  if (totalScroll <= 0) return;
-  const scrollY = window.scrollY;
-  const percent = scrollY / totalScroll;       // 0 = top, 1 = bottom
-  const inverted = 1 - percent;                // we want upward fill
-  const fillHeight = inverted * 100;
-
-  fill.style.height = fillHeight + '%';
-
-  // trigger pulse animation while moving
-  fill.style.animation = 'pulseGlow 1.5s infinite';
-
-  // slightly increase glow intensity when near top
-  const glow = 10 + 20 * inverted;
-  fill.style.boxShadow = `0 0 ${glow}px 3px #f7931a`;
-}
+  function updateProgress() {
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    if (total <= 0) return;
+    const scrollY = window.scrollY;
+    const percent = scrollY / total;      // 0 = top, 1 = bottom
+    const inverted = 1 - percent;         // we want fill upward
+    bar.style.height = (inverted * 100) + '%';
+  }
 
   window.addEventListener('scroll', updateProgress);
   window.addEventListener('resize', updateProgress);
 </script>
+
 
 </body>
 </html>
