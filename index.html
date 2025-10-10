@@ -1,167 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ordinal Strategy | Precision in Bitcoin Ordinals</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      height: 100%;
-      background: #0b0c10;
-      color: #f1f1f1;
-      font-family: 'Inter', sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      height:100%;
+      background:#0b0c10;
+      color:#f1f1f1;
+      font-family:'Inter',sans-serif;
+      scroll-behavior:smooth;
+      overflow-x:hidden;
     }
 
-    /* ---- Rotate layout (keeps native scrolling) ---- */
-    body {
-      transform: rotate(180deg);
-      transform-origin: center;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      scroll-behavior: smooth;
-      scroll-snap-type: y mandatory;
+    /* --- Reverse scroll layout --- */
+    body{
+      transform:rotate(180deg);
+      overflow-y:auto;
+    }
+    header,section,footer{
+      transform:rotate(180deg);
+      scroll-snap-align:start;
+      min-height:100vh;
+      padding:80px 10%;
     }
 
-    /* rotate content blocks back so text reads normally */
-    header, section, footer {
-      transform: rotate(180deg);
-      transform-origin: center;
-      scroll-snap-align: start;
-      min-height: 100vh;
-      padding: 80px 10%;
-    }
-
-    /* ---------- HEADER (fixed at bottom visually) ---------- */
-    header {
-      position: fixed;
-      left: 0; right: 0; bottom: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 6%;
-      z-index: 999;
-      background: rgba(11,12,16,0.55);
-      backdrop-filter: blur(8px) saturate(120%);
-      -webkit-backdrop-filter: blur(8px);
-      border-top: 1px solid rgba(255,255,255,0.04);
-      box-shadow: 0 -6px 30px rgba(0,0,0,0.6);
-    }
-
-    .logo { display:flex; align-items:center; gap:12px; }
-    .logo img {
-      height: 100px; /* bigger logo */
-      width: auto;
-      object-fit: contain;
-      transition: transform .25s ease;
-      display: block;
-    }
-    .logo img:hover { transform: scale(1.06); }
-
-    nav a {
-      margin: 0 12px;
-      color: #ddd;
-      font-weight: 500;
-      text-decoration: none;
-    }
-    nav a:hover { color: #fff; }
-
-    /* ---------- HERO ---------- */
-    .hero {
+    /* --- Header (bottom dock) --- */
+    header{
+      position:fixed;
+      bottom:0;left:0;right:0;
       display:flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      background: radial-gradient(circle at top, #1b1c1f 0%, #0b0c10 100%);
+      align-items:center;
+      justify-content:space-between;
+      padding:25px 8%;
+      z-index:999;
+      background:rgba(11,12,16,0.6);
+      backdrop-filter:blur(10px) saturate(140%);
+      border-top:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 -4px 25px rgba(0,0,0,0.7);
     }
-    .hero h2 { font-size: 2.5rem; margin-bottom: 14px; }
-    .hero p { font-size: 1.1rem; max-width: 720px; margin-bottom: 20px; }
-    .buttons a {
-      display:inline-block;
-      margin:8px;
-      padding:12px 24px;
+
+    .logo img{
+      height:250px; /* 2.5x bigger */
+      width:auto;
+      object-fit:contain;
+      display:block;
+      transition:transform .25s ease;
+    }
+    .logo img:hover{transform:scale(1.08)}
+
+    nav a{
+      margin:0 12px;
+      color:#ddd;
+      font-weight:500;
+      text-decoration:none;
+      transition:.2s;
+    }
+    nav a:hover{color:#fff}
+
+    /* --- Hero --- */
+    .hero{
+      display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+      background:radial-gradient(circle at top,#1b1c1f 0%,#0b0c10 100%);
+    }
+    .hero h2{font-size:2.4rem;margin-bottom:12px}
+    .hero p{font-size:1.1rem;max-width:720px;margin-bottom:18px}
+    .buttons a{
+      display:inline-block;margin:8px;padding:12px 24px;background:#f7931a;color:#0b0c10;
+      border-radius:28px;font-weight:600;text-decoration:none;transition:.25s;
+    }
+    .buttons a:hover{background:#fff;color:#000;transform:scale(1.05)}
+
+    /* --- Sections --- */
+    .section-title{font-size:2rem;color:#f7931a;margin-bottom:20px;text-align:center}
+    .about p{text-align:center;max-width:700px;margin:0 auto}
+    .mechanics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px;margin-top:30px}
+    .mechanics-grid div{background:#111317;padding:28px;border-radius:12px;transition:.25s}
+    .mechanics-grid div:hover{background:#1d1f25}
+    .roadmap ul{list-style:none;max-width:720px;margin:0 auto}
+    .roadmap li{background:#111317;padding:14px 18px;border-left:4px solid #f7931a;margin-bottom:12px;border-radius:8px}
+    .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:26px;margin-top:30px;text-align:center}
+    .team-grid div{background:#111317;padding:20px;border-radius:12px}
+    .team-grid img{width:80px;height:80px;border-radius:50%;margin-bottom:12px}
+    .socials{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+    .socials a{background:#f7931a;padding:10px 18px;border-radius:20px;color:#000;font-weight:600;text-decoration:none}
+    .socials a:hover{background:#fff}
+    footer{background:#090a0d;text-align:center;padding:40px 10px;color:#888;font-size:.95rem}
+
+    /* --- Progress bar (right side, bottom->top fill) --- */
+    #progress{
+      position:fixed;
+      right:14px;
+      bottom:20px;
+      width:6px;
+      height:calc(100% - 40px);
+      background:rgba(255,255,255,0.1);
+      border-radius:6px;
+      overflow:hidden;
+      z-index:1000;
+    }
+    #progress .fill{
+      position:absolute;
+      left:0;
+      bottom:0;
+      width:100%;
+      height:0%;
       background:#f7931a;
-      color:#0b0c10;
-      border-radius:28px;
-      font-weight:600;
-    }
-    .buttons a:hover { background:#fff; color:#000; transform: scale(1.03); }
-
-    /* ---------- SECTIONS ---------- */
-    .section-title { font-size: 2rem; color: #f7931a; margin-bottom: 20px; text-align:center; }
-    .about p { text-align:center; max-width:700px; margin:0 auto; }
-
-    .mechanics-grid {
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap:28px;
-      margin-top: 30px;
-    }
-    .mechanics-grid div {
-      background:#111317;
-      padding: 28px;
-      border-radius: 12px;
-      transition: background .25s;
-    }
-    .mechanics-grid div:hover { background:#1d1f25; }
-
-    .roadmap ul { list-style:none; max-width:720px; margin:0 auto; }
-    .roadmap li {
-      background:#111317;
-      padding: 14px 18px;
-      border-left: 4px solid #f7931a;
-      margin-bottom: 12px;
-      border-radius: 8px;
+      border-radius:6px 6px 0 0;
+      transition:height .15s linear;
     }
 
-    .team-grid {
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap:26px;
-      margin-top: 30px;
-    }
-    .team-grid div { background:#111317; padding:20px; border-radius:12px; text-align:center; }
-    .team-grid img { width:80px; height:80px; border-radius:50%; margin-bottom:12px; }
-
-    .socials { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
-    .socials a { background:#f7931a; padding:10px 18px; border-radius:20px; color:#000; font-weight:600; text-decoration:none; }
-    .socials a:hover { background:#fff; }
-
-    footer { background:#090a0d; text-align:center; padding:40px 10px; color:#888; font-size:.95rem; }
-
-    /* progress bar (fills bottom -> top) */
-    #progress {
-      position: fixed;
-      right: 12px;
-      bottom: 14px;
-      width: 8px;
-      height: calc(100% - 28px);
-      background: rgba(255,255,255,0.06);
-      border-radius: 6px;
-      overflow: hidden;
-      z-index: 1000;
-    }
-    #progress .fill {
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      width: 100%;
-      height: 0%;
-      background: #f7931a;
-      border-radius: 6px 6px 0 0;
-      transition: height .12s linear;
-    }
-
-    /* responsiveness */
-    @media (max-width: 720px) {
-      .logo img { height: 64px; }
-      .hero h2 { font-size: 1.6rem; }
-      header { padding: 12px 4%; }
-      section { padding: 60px 6%; }
+    @media(max-width:720px){
+      .logo img{height:160px}
+      header{padding:18px 6%}
+      section{padding:60px 6%}
+      .hero h2{font-size:1.7rem}
     }
   </style>
 </head>
@@ -172,7 +128,6 @@
 
   <header>
     <div class="logo">
-      <!-- Make sure the filename matches your uploaded logo exactly -->
       <img src="os fun.png" alt="Ordinal Strategy Logo">
     </div>
     <nav>
@@ -192,26 +147,15 @@
     <h3 class="section-title">Join the Movement</h3>
     <p>Ordinals are the art of precision — join us in mastering the strategy.</p>
     <div class="socials">
-      <a href="#">Twitter</a>
-      <a href="#">Discord</a>
-      <a href="#">GitHub</a>
-      <a href="#">Email</a>
+      <a href="#">Twitter</a><a href="#">Discord</a><a href="#">GitHub</a><a href="#">Email</a>
     </div>
   </section>
 
   <section id="team" class="team">
     <h3 class="section-title">Behind the Strategy</h3>
     <div class="team-grid">
-      <div>
-        <img src="https://via.placeholder.com/80" alt="Avatar">
-        <h4>Blaze Kachu</h4>
-        <p>Founder / Creator — Visionary behind the Ordinal Strategy initiative.</p>
-      </div>
-      <div>
-        <img src="https://via.placeholder.com/80" alt="Avatar">
-        <h4>Contributor</h4>
-        <p>Research & Development — Empowering the on-chain ecosystem.</p>
-      </div>
+      <div><img src="https://via.placeholder.com/80" alt="Avatar"><h4>Blaze Kachu</h4><p>Founder / Creator — Visionary behind the Ordinal Strategy initiative.</p></div>
+      <div><img src="https://via.placeholder.com/80" alt="Avatar"><h4>Contributor</h4><p>Research & Development — Empowering the on-chain ecosystem.</p></div>
     </div>
   </section>
 
@@ -250,38 +194,31 @@
   </section>
 
   <script>
-    // 1) Smooth initial load: jump to bottom (so footer appears first visually)
-    window.addEventListener('load', function() {
-      setTimeout(() => {
-        window.scrollTo({ top: document.documentElement.scrollHeight, left: 0 });
-      }, 150);
+    // Scroll to bottom on load (so footer visible first)
+    window.addEventListener('load',()=>{
+      setTimeout(()=>{window.scrollTo(0,document.body.scrollHeight);},200);
     });
 
-    // 2) Smooth in-page navigation (works with rotated body)
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
+    // Smooth anchor scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click',e=>{
         e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const t=document.querySelector(a.getAttribute('href'));
+        if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
       });
     });
 
-    // 3) Reverse progress bar: fills as user scrolls UP from bottom
-    const progressFill = document.querySelector('#progress .fill');
-    function updateProgress() {
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (maxScroll <= 0) {
-        progressFill.style.height = '100%';
-        return;
-      }
-      const scTop = window.scrollY;
-      const percent = 1 - (scTop / maxScroll); // 0 at bottom, 1 at top
-      const clamped = Math.max(0, Math.min(1, percent));
-      progressFill.style.height = (clamped * 100) + '%';
+    // Progress bar fill (bottom→top)
+    const fill=document.querySelector('#progress .fill');
+    function updateBar(){
+      const max=document.documentElement.scrollHeight-window.innerHeight;
+      const sc=window.scrollY;
+      const pct=1-(sc/max);
+      fill.style.height=Math.max(0,Math.min(1,pct))*100+'%';
     }
-    window.addEventListener('scroll', updateProgress);
-    window.addEventListener('resize', updateProgress);
-    updateProgress();
+    window.addEventListener('scroll',updateBar);
+    window.addEventListener('resize',updateBar);
+    updateBar();
   </script>
 </body>
 </html>
