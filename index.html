@@ -8,41 +8,53 @@
   <style>
     /* ---------- GLOBAL ---------- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    /* REVERSE SCROLL SETUP */
+    html {
+      transform: rotate(180deg);
+    }
+    
     body {
+      transform: rotate(180deg);
       font-family: 'Inter', sans-serif;
       background-color: #0b0c10;
       color: #f1f1f1;
       line-height: 1.6;
     }
+    
     a { color: #f7931a; text-decoration: none; }
     section { padding: 80px 10%; }
 
     /* ---------- NAV ---------- */
     .logo {
-  display: flex;
-  align-items: center;
-}
+      display: flex;
+      align-items: center;
+    }
 
-.logo img {
-  height: 100px;          /* increase size */
-  width: auto;           /* keep proportions */
-  object-fit: contain;
-  transition: transform 0.3s ease;
-}
+    .logo img {
+      height: 100px;
+      width: auto;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
 
-.logo img:hover {
-  transform: scale(1.5);  /* subtle hover zoom */
-}
+    .logo img:hover {
+      transform: scale(1.5);
+    }
 
     header {
       position: fixed;
       width: 100%;
-      top: 0; left: 0;
+      bottom: 0;
+      left: 0;
       background: rgba(0,0,0,0.8);
       padding: 20px 10%;
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
       z-index: 10;
     }
+    
     header h1 { font-size: 1.5rem; color: #f7931a; }
     nav a { margin: 0 10px; font-weight: 500; }
     nav a:hover { color: #fff; }
@@ -51,7 +63,10 @@
     .hero {
       height: 100vh;
       background: radial-gradient(circle at top, #1b1c1f 0%, #0b0c10 100%);
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center;
       text-align: center;
       padding: 0 10%;
     }
@@ -131,8 +146,11 @@
 
     /* ---------- COMMUNITY ---------- */
     .community .socials {
-      display: flex; justify-content: center; flex-wrap: wrap;
-      gap: 15px; margin-top: 30px;
+      display: flex; 
+      justify-content: center; 
+      flex-wrap: wrap;
+      gap: 15px; 
+      margin-top: 30px;
     }
     .socials a {
       background: #f7931a;
@@ -168,80 +186,88 @@
   </nav>
 </header>
 
-  <section class="hero">
-    <h2>Precision in the World of Bitcoin Ordinals</h2>
-    <p>Ordinal Strategy is a framework for research, tracking, and optimization across Bitcoin Ordinals, built for collectors, creators, and strategists.</p>
-    <div class="buttons">
-      <a href="#mechanics">Explore Strategy</a>
-      <a href="#about">Learn More</a>
+<footer>
+  © 2025 OrdinalStrategy.fun — Built with precision on Bitcoin.
+</footer>
+
+<section id="community" class="community">
+  <h3 class="section-title">Join the Movement</h3>
+  <p>Ordinals are the art of precision — join us in mastering the strategy.</p>
+  <div class="socials">
+    <a href="#">Twitter</a>
+    <a href="#">Discord</a>
+    <a href="#">GitHub</a>
+    <a href="#">Email</a>
+  </div>
+</section>
+
+<section id="team" class="team">
+  <h3 class="section-title">Behind the Strategy</h3>
+  <div class="team-grid">
+    <div>
+      <img src="https://via.placeholder.com/80" alt="Avatar">
+      <h4>Blaze Kachu</h4>
+      <p>Founder / Creator — Visionary behind the Ordinal Strategy initiative.</p>
     </div>
-  </section>
-
-  <section id="about" class="about">
-    <h3 class="section-title">Why Ordinal Strategy?</h3>
-    <p>We blend research, on-chain tools, and market data to empower collectors and creators. With precise insights and curated analytics, we help decode the Bitcoin Ordinals ecosystem for strategic advantage.</p>
-  </section>
-
-  <section id="mechanics" class="mechanics">
-    <h3 class="section-title">How It Works</h3>
-    <div class="mechanics-grid">
-      <div><h4>🔍 Track</h4><p>Monitor Ordinal activity across blocks with precision.</p></div>
-      <div><h4>⚙️ Analyze</h4><p>Study rarity, metadata, and market behavior in real time.</p></div>
-      <div><h4>🧾 Curate</h4><p>Organize collections and optimize your strategy portfolio.</p></div>
-      <div><h4>🔗 Share</h4><p>Collaborate and share your research across the ecosystem.</p></div>
+    <div>
+      <img src="https://via.placeholder.com/80" alt="Avatar">
+      <h4>Contributor</h4>
+      <p>Research & Development — Empowering the on-chain ecosystem.</p>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section id="roadmap" class="roadmap">
-    <h3 class="section-title">The Path Ahead</h3>
-    <ul>
-      <li><b>Q4 2025:</b> Launch of Ordinal Dashboard</li>
-      <li><b>Q1 2026:</b> Partner Integrations</li>
-      <li><b>Q2 2026:</b> AI-assisted Rarity Predictions</li>
-      <li><b>Q3 2026:</b> Community DAO Governance</li>
-    </ul>
-  </section>
+<section id="roadmap" class="roadmap">
+  <h3 class="section-title">The Path Ahead</h3>
+  <ul>
+    <li><b>Q4 2025:</b> Launch of Ordinal Dashboard</li>
+    <li><b>Q1 2026:</b> Partner Integrations</li>
+    <li><b>Q2 2026:</b> AI-assisted Rarity Predictions</li>
+    <li><b>Q3 2026:</b> Community DAO Governance</li>
+  </ul>
+</section>
 
-  <section id="team" class="team">
-    <h3 class="section-title">Behind the Strategy</h3>
-    <div class="team-grid">
-      <div>
-        <img src="https://via.placeholder.com/80" alt="Avatar">
-        <h4>Blaze Kachu</h4>
-        <p>Founder / Creator — Visionary behind the Ordinal Strategy initiative.</p>
-      </div>
-      <div>
-        <img src="https://via.placeholder.com/80" alt="Avatar">
-        <h4>Contributor</h4>
-        <p>Research & Development — Empowering the on-chain ecosystem.</p>
-      </div>
-    </div>
-  </section>
+<section id="mechanics" class="mechanics">
+  <h3 class="section-title">How It Works</h3>
+  <div class="mechanics-grid">
+    <div><h4>🔍 Track</h4><p>Monitor Ordinal activity across blocks with precision.</p></div>
+    <div><h4>⚙️ Analyze</h4><p>Study rarity, metadata, and market behavior in real time.</p></div>
+    <div><h4>🧾 Curate</h4><p>Organize collections and optimize your strategy portfolio.</p></div>
+    <div><h4>🔗 Share</h4><p>Collaborate and share your research across the ecosystem.</p></div>
+  </div>
+</section>
 
-  <section id="community" class="community">
-    <h3 class="section-title">Join the Movement</h3>
-    <p>Ordinals are the art of precision — join us in mastering the strategy.</p>
-    <div class="socials">
-      <a href="#">Twitter</a>
-      <a href="#">Discord</a>
-      <a href="#">GitHub</a>
-      <a href="#">Email</a>
-    </div>
-  </section>
+<section id="about" class="about">
+  <h3 class="section-title">Why Ordinal Strategy?</h3>
+  <p>We blend research, on-chain tools, and market data to empower collectors and creators. With precise insights and curated analytics, we help decode the Bitcoin Ordinals ecosystem for strategic advantage.</p>
+</section>
 
-  <footer>
-    © 2025 OrdinalStrategy.fun — Built with precision on Bitcoin.
-  </footer>
+<section class="hero">
+  <h2>Precision in the World of Bitcoin Ordinals</h2>
+  <p>Ordinal Strategy is a framework for research, tracking, and optimization across Bitcoin Ordinals, built for collectors, creators, and strategists.</p>
+  <div class="buttons">
+    <a href="#mechanics">Explore Strategy</a>
+    <a href="#about">Learn More</a>
+  </div>
+</section>
 
-  <script>
-    // Smooth scroll
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
-      });
+<script>
+  // Scroll to bottom on page load (appears as top in rotated view)
+  window.addEventListener('load', function() {
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
     });
-  </script>
+  });
+</script>
 
 </body>
 </html>
