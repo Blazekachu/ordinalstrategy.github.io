@@ -1,169 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ordinal Strategy — Live Bitcoin Block Visual</title>
-
-  <!-- D3.js for treemap rendering -->
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ordinal Strategy | Precision in Bitcoin Ordinals</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
-    /* Remove margins and make full screen */
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: #0b0c10;
+      color: #f1f1f1;
+      font-family: 'Inter', sans-serif;
       overflow: hidden;
-      font-family: monospace;
-      color: #fefefe;
-      background: transparent;
     }
 
-    /* Background container for live Bitcoin treemap */
-    #treemap-bg {
+    .site {
+      height: 100vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+    }
+
+    section, footer {
+      min-height: 100vh;
+      padding: 80px 10%;
+      scroll-snap-align: start;
+    }
+
+    header {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 6%;
+      z-index: 999;
+      background: rgba(11,12,16,0.65);
+      backdrop-filter: blur(10px) saturate(120%);
+      border-top: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.6);
+    }
+
+    .logo img {
+      height: 250px;
+      width: auto;
+      object-fit: contain;
+      transition: transform .25s ease;
+      display: block;
+    }
+    .logo img:hover { transform: scale(1.04); }
+
+    nav { display: flex; gap: 10px; align-items: center; }
+    nav a { color: #ddd; text-decoration: none; font-weight: 600; margin-left: 12px; }
+    nav a:hover { color: #fff; }
+
+    .hero {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: radial-gradient(circle at top, #1b1c1f 0%, #0b0c10 100%);
+    }
+    .hero h2 { font-size: 2.4rem; margin-bottom: 12px; }
+    .hero p { font-size: 1.1rem; max-width: 720px; margin-bottom: 18px; }
+    .buttons a {
+      display: inline-block; margin: 8px; padding: 12px 24px; background: #f7931a;
+      color: #0b0c10; border-radius: 28px; font-weight: 600; text-decoration: none;
+    }
+    .buttons a:hover { background: #fff; color: #000; transform: scale(1.03); }
+
+    .section-title { font-size: 2rem; color: #f7931a; text-align: center; margin-bottom: 16px; }
+    .about p { text-align: center; max-width: 700px; margin: 0 auto; }
+
+    .mechanics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 28px; margin-top: 22px; }
+    .mechanics-grid > div { background: #111317; padding: 22px; border-radius: 12px; }
+    .roadmap ul { list-style: none; max-width: 720px; margin: 0 auto; }
+    .roadmap li { background: #111317; padding: 14px 18px; border-left: 4px solid #f7931a; margin-bottom: 12px; border-radius: 8px; }
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 26px; margin-top: 20px; }
+    .team-grid img { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 12px; }
+
+    .socials { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+    .socials a { background: #f7931a; padding: 10px 18px; border-radius: 20px; color: #000; font-weight: 600; text-decoration: none; }
+    .socials a:hover { background: #fff; }
+
+    footer { background: #090a0d; text-align: center; padding: 40px 10px; color: #888; font-size: .95rem; }
+
+    /* ===== progress + rocket (fixed right) ===== */
+    #progress-container {
       position: fixed;
       top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      right: 18px;
+      width: 8px;
+      height: 100%;
+      background: rgba(255,255,255,0.06);
+      border-radius: 10px;
       overflow: hidden;
-      z-index: -1;
-      background: radial-gradient(circle at center, #1a1a1a 20%, #000000 100%);
+      z-index: 10000;
+      pointer-events: none;
     }
-
-    /* Treemap nodes */
-    .node {
+    #progress-bar {
       position: absolute;
-      box-sizing: border-box;
-      border-radius: 2px;
-      opacity: 0.75;
-      transition: transform 2s ease, opacity 0.3s ease;
-      animation: glowPulse 3s infinite alternate;
-    }
-
-    /* Orange glow animation */
-    @keyframes glowPulse {
-      0% { filter: drop-shadow(0 0 10px #ff8c00); }
-      50% { filter: drop-shadow(0 0 25px #ffb700); }
-      100% { filter: drop-shadow(0 0 10px #ff8c00); }
-    }
-
-    /* Overlay content (website text / elements) */
-    .content {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      top: 40%;
-      transform: translateY(-40%);
-    }
-
-    h1 {
-      font-size: 2.5em;
-      letter-spacing: 2px;
-      color: #ffb700;
-      text-shadow: 0 0 15px #ff8c00;
-    }
-
-    p {
-      font-size: 1.1em;
-      color: #ddd;
-    }
-
-    footer {
-      position: fixed;
-      bottom: 10px;
+      bottom: 0;
+      left: 0;
       width: 100%;
-      text-align: center;
-      color: #777;
-      font-size: 0.9em;
-      z-index: 3;
+      height: 2%;
+      background: #f7931a;
+      border-radius: 10px 10px 0 0;
+      box-shadow: 0 0 10px 3px rgba(247,147,26,0.45);
+      transition: height .12s linear, box-shadow .12s linear;
+    }
+    #scroll-rocket {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 40px;
+      bottom: 0;
+      transition: bottom 0.18s linear, transform 0.18s ease;
+      animation: rocketFloat 3s ease-in-out infinite;
+      z-index: 10002;
+      pointer-events: auto;
+    }
+    #scroll-rocket img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px #f7931a);
+    }
+    @keyframes rocketFloat {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%     { transform: translateX(-50%) translateY(-6px); }
+    }
+
+    @media (max-width: 740px) {
+      .logo img { height: 140px; }
+      header { padding: 12px 5%; }
+      section { padding: 60px 6%; }
+      .hero h2 { font-size: 1.6rem; }
+      #progress-container { right: 10px; width: 6px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Live Bitcoin background -->
-  <div id="treemap-bg"></div>
+  <!-- header -->
+  <header>
+    <div class="logo">
+      <img src="osfun.png" alt="Ordinal Strategy Logo">
+    </div>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#mechanics">How It Works</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#team">Team</a>
+      <a href="#community">Community</a>
+    </nav>
+  </header>
 
-  <!-- Foreground content -->
-  <div class="content">
-    <h1>Ordinal Strategy</h1>
-    <p>Live Bitcoin Block Transactions — Updated Every 30 Seconds</p>
+  <!-- progress bar + rocket -->
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+    <div id="scroll-rocket">
+      <img src="rocket.png" alt="Scroll Up Rocket">
+    </div>
   </div>
 
-  <footer>
-    ⚡ Powered by <a href="https://mempool.space/" target="_blank" style="color:#ff8c00;text-decoration:none;">mempool.space</a>
-  </footer>
+  <!-- main content -->
+  <div class="site" id="site">
+
+    <footer>© 2025 OrdinalStrategy.fun — Built with precision on Bitcoin.</footer>
+
+    <section id="community" class="community">
+      <h3 class="section-title">Join the Movement</h3>
+      <p>Ordinals are the art of precision — join us in mastering the strategy.</p>
+      <div class="socials">
+        <a href="#">Twitter</a><a href="#">Discord</a><a href="#">GitHub</a><a href="#">Email</a>
+      </div>
+    </section>
+
+    <section id="team" class="team">
+      <h3 class="section-title">Behind the Strategy</h3>
+      <div class="team-grid">
+        <div><img src="https://via.placeholder.com/80"><h4>Blaze Kachu</h4><p>Founder / Creator — Visionary behind the Ordinal Strategy initiative.</p></div>
+        <div><img src="https://via.placeholder.com/80"><h4>Contributor</h4><p>Research & Development — Empowering the on-chain ecosystem.</p></div>
+      </div>
+    </section>
+
+    <section id="roadmap" class="roadmap">
+      <h3 class="section-title">The Path Ahead</h3>
+      <ul>
+        <li><b>Q4 2025:</b> Launch of Ordinal Dashboard</li>
+        <li><b>Q1 2026:</b> Partner Integrations</li>
+        <li><b>Q2 2026:</b> AI-assisted Rarity Predictions</li>
+        <li><b>Q3 2026:</b> Community DAO Governance</li>
+      </ul>
+    </section>
+
+    <section id="mechanics" class="mechanics">
+      <h3 class="section-title">How It Works</h3>
+      <div class="mechanics-grid">
+        <div><h4>🔍 Track</h4><p>Monitor Ordinal activity across blocks with precision.</p></div>
+        <div><h4>⚙️ Analyze</h4><p>Study rarity, metadata, and market behavior in real time.</p></div>
+        <div><h4>🧾 Curate</h4><p>Organize collections and optimize your strategy portfolio.</p></div>
+        <div><h4>🔗 Share</h4><p>Collaborate and share your research across the ecosystem.</p></div>
+      </div>
+    </section>
+
+    <section id="about" class="about">
+      <h3 class="section-title">Why Ordinal Strategy?</h3>
+      <p>We blend research, on-chain tools, and market data to empower collectors and creators. With precise insights and curated analytics, we help decode the Bitcoin Ordinals ecosystem for strategic advantage.</p>
+    </section>
+
+    <section class="hero">
+      <h2>Precision in the World of Bitcoin Ordinals</h2>
+      <p>Ordinal Strategy is a framework for research, tracking, and optimization across Bitcoin Ordinals — built for collectors, creators, and strategists.</p>
+      <div class="buttons"><a href="#mechanics">Explore Strategy</a><a href="#about">Learn More</a></div>
+    </section>
+  </div>
 
   <script>
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const container = d3.select("#treemap-bg");
+  (function () {
+    const site = document.getElementById('site');
+    const barContainer = document.getElementById('progress-container');
+    const bar = document.getElementById('progress-bar');
+    const rocket = document.getElementById('scroll-rocket');
 
-    async function fetchBlockData() {
-      try {
-        const response = await fetch("https://mempool.space/api/mempool/recent");
-        const blocks = await response.json();
-        renderTreemap(blocks);
-      } catch (error) {
-        console.error("Failed to fetch mempool data:", error);
-      }
+    if (!site || !barContainer || !bar || !rocket) return;
+
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        site.scrollTop = site.scrollHeight;
+        updateAll();
+      }, 120);
+    });
+
+    function updateAll() {
+      const maxScroll = Math.max(1, site.scrollHeight - site.clientHeight);
+      const sc = site.scrollTop;
+      const pct = 1 - (sc / maxScroll);
+
+      bar.style.height = (pct * 100) + '%';
+
+      const containerH = barContainer.clientHeight;
+      const rocketH = rocket.clientHeight || 40;
+      const travel = Math.max(0, containerH - rocketH - 6);
+      rocket.style.bottom = (travel * pct) + 'px';
+
+      const glow = 8 + (pct * 36);
+      const spread = 2 + (pct * 4);
+      bar.style.boxShadow = `0 0 ${glow}px ${spread}px rgba(247,147,26,${0.45 + 0.35 * pct})`;
+      rocket.style.boxShadow = `0 0 ${glow/2}px ${Math.max(1, spread/2)}px rgba(247,147,26,0.45)`;
     }
 
-    function renderTreemap(blocks) {
-      container.selectAll("*").remove();
+    rocket.addEventListener('click', () => {
+      site.scrollBy({ top: -site.clientHeight, left: 0, behavior: 'smooth' });
+    });
 
-      const data = {
-        name: "mempool",
-        children: blocks.map((block) => ({
-          name: block.tx_count,
-          value: block.size,
-        })),
-      };
+    site.addEventListener('scroll', updateAll);
+    window.addEventListener('resize', updateAll);
 
-      const root = d3.hierarchy(data).sum((d) => d.value);
-      d3.treemap().size([width, height]).padding(1)(root);
+    document.querySelectorAll('nav a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) site.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+      });
+    });
 
-      const colorScale = d3.scaleSequential()
-        .domain([0, d3.max(root.leaves(), (d) => d.value)])
-        .interpolator(d3.interpolateWarm);
-
-      const nodes = container
-        .selectAll(".node")
-        .data(root.leaves())
-        .enter()
-        .append("div")
-        .attr("class", "node")
-        .style("left", (d) => d.x0 + "px")
-        .style("top", (d) => d.y0 + "px")
-        .style("width", (d) => d.x1 - d.x0 + "px")
-        .style("height", (d) => d.y1 - d.y0 + "px")
-        .style("background", (d) => colorScale(d.value))
-        .style("box-shadow", "0 0 15px rgba(255, 140, 0, 0.6)");
-
-      // Parallax floating animation
-      function animateParallax() {
-        nodes.each(function() {
-          const node = d3.select(this);
-          const randomX = (Math.random() - 0.5) * 20;
-          const randomY = (Math.random() - 0.5) * 20;
-          node.transition()
-            .duration(4000 + Math.random() * 3000)
-            .ease(d3.easeSinInOut)
-            .style("transform", `translate(${randomX}px, ${randomY}px)`)
-            .on("end", animateParallax);
-        });
-      }
-      animateParallax();
-    }
-
-    // Initial load
-    fetchBlockData();
-
-    // Refresh every 30 seconds
-    setInterval(fetchBlockData, 30000);
+    setTimeout(updateAll, 160);
+  })();
   </script>
 </body>
 </html>
