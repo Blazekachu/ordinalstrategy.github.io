@@ -196,32 +196,37 @@
     </div>
   </section>
 
-  <script>
-    // Scroll to bottom on load (so footer visible first)
-    window.addEventListener('load',()=>{
-      setTimeout(()=>{window.scrollTo(0,document.body.scrollHeight);},200);
-    });
+<script>
+  // 1) Jump to bottom on load so footer shows first
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      window.scrollTo(0, document.body.scrollHeight);
+      updateBar();
+    }, 250);
+  });
 
-    // Smooth anchor scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(a=>{
-      a.addEventListener('click',e=>{
-        e.preventDefault();
-        const t=document.querySelector(a.getAttribute('href'));
-        if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
-      });
+  // 2) Smooth anchor scrolling
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+  });
 
-    // Progress bar fill (bottom→top)
-    const fill=document.querySelector('#progress .fill');
-    function updateBar(){
-      const max=document.documentElement.scrollHeight-window.innerHeight;
-      const sc=window.scrollY;
-      const pct=1-(sc/max);
-      fill.style.height=Math.max(0,Math.min(1,pct))*100+'%';
-    }
-    window.addEventListener('scroll',updateBar);
-    window.addEventListener('resize',updateBar);
-    updateBar();
-  </script>
+  // 3) Progress bar logic that respects 180° rotation
+  const bar = document.querySelector('#progress .fill');
+  function updateBar() {
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const current = window.scrollY;
+    const percent = current / maxScroll;          // 0 at top, 1 at bottom
+    const inverted = 1 - percent;                 // we want 0 at bottom, 1 at top
+    bar.style.height = (inverted * 100) + '%';
+  }
+
+  window.addEventListener('scroll', updateBar);
+  window.addEventListener('resize', updateBar);
+</script>
+
 </body>
 </html>
