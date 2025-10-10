@@ -93,11 +93,11 @@
 /* --- Progress bar (right side, bottom→top fill + glow) --- */
 #progress {
   position: fixed;
+  top: 0;
   right: 18px;
-  bottom: 18px;
   width: 8px;
-  height: calc(100% - 36px);
-  background: rgba(255, 255, 255, 0.08);
+  height: 100%;
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   overflow: hidden;
   z-index: 9999;
@@ -114,6 +114,12 @@
   box-shadow: 0 0 10px 2px #f7931a66;
   border-radius: 10px 10px 0 0;
   transition: height 0.15s linear, box-shadow 0.3s ease;
+}
+
+    /* glowing pulse animation */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 10px 2px #f7931a66; }
+  50%      { box-shadow: 0 0 18px 4px #f7931aff; }
 }
 
     @media(max-width:720px){
@@ -217,20 +223,23 @@
   // === PROGRESS BAR ===
   const fill = document.querySelector('#progress .fill');
 
-  function updateProgress() {
-    const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-    if (totalScroll <= 0) return;
-    const scrollY = window.scrollY;
-    const percent = scrollY / totalScroll;   // 0 top, 1 bottom
-    const inverted = 1 - percent;            // we want fill upward
-    const fillHeight = (inverted * 100);
+function updateProgress() {
+  const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+  if (totalScroll <= 0) return;
+  const scrollY = window.scrollY;
+  const percent = scrollY / totalScroll;       // 0 = top, 1 = bottom
+  const inverted = 1 - percent;                // we want upward fill
+  const fillHeight = inverted * 100;
 
-    fill.style.height = fillHeight + '%';
+  fill.style.height = fillHeight + '%';
 
-    // glow intensity while scrolling
-    const glow = Math.max(6, 20 * inverted);
-    fill.style.boxShadow = `0 0 ${glow}px 2px #f7931a80`;
-  }
+  // trigger pulse animation while moving
+  fill.style.animation = 'pulseGlow 1.5s infinite';
+
+  // slightly increase glow intensity when near top
+  const glow = 10 + 20 * inverted;
+  fill.style.boxShadow = `0 0 ${glow}px 3px #f7931a`;
+}
 
   window.addEventListener('scroll', updateProgress);
   window.addEventListener('resize', updateProgress);
