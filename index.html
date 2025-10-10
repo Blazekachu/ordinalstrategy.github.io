@@ -197,15 +197,15 @@
   </section>
 
 <script>
-  // 1) Jump to bottom on load so footer shows first
+  // === INITIAL LOAD (scroll to bottom) ===
   window.addEventListener('load', () => {
     setTimeout(() => {
       window.scrollTo(0, document.body.scrollHeight);
-      updateBar();
-    }, 250);
+      updateProgress();
+    }, 400);
   });
 
-  // 2) Smooth anchor scrolling
+  // === SMOOTH ANCHOR LINKS ===
   document.querySelectorAll('a[href^="#"]').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -214,18 +214,26 @@
     });
   });
 
-  // 3) Progress bar logic that respects 180° rotation
-  const bar = document.querySelector('#progress .fill');
-  function updateBar() {
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const current = window.scrollY;
-    const percent = current / maxScroll;          // 0 at top, 1 at bottom
-    const inverted = 1 - percent;                 // we want 0 at bottom, 1 at top
-    bar.style.height = (inverted * 100) + '%';
+  // === PROGRESS BAR ===
+  const fill = document.querySelector('#progress .fill');
+
+  function updateProgress() {
+    const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (totalScroll <= 0) return;
+    const scrollY = window.scrollY;
+    const percent = scrollY / totalScroll;   // 0 top, 1 bottom
+    const inverted = 1 - percent;            // we want fill upward
+    const fillHeight = (inverted * 100);
+
+    fill.style.height = fillHeight + '%';
+
+    // glow intensity while scrolling
+    const glow = Math.max(6, 20 * inverted);
+    fill.style.boxShadow = `0 0 ${glow}px 2px #f7931a80`;
   }
 
-  window.addEventListener('scroll', updateBar);
-  window.addEventListener('resize', updateBar);
+  window.addEventListener('scroll', updateProgress);
+  window.addEventListener('resize', updateProgress);
 </script>
 
 </body>
