@@ -389,6 +389,49 @@
       return Math.round(weightedFeeVsize / totalVsize);
     }
 
+    async function fetchNextBlockMedianFee() {
+      try {
+        const mempoolBlocks = await fetch('https://mempool.space/api/v1/fees/mempool-blocks').then(r => r.json());
+        if (Array.isArray(mempoolBlocks) && mempoolBlocks[0] && typeof mempoolBlocks[0].medianFee === 'number') {
+          const val = Math.round(mempoolBlocks[0].medianFee);
+          return val > 0 ? val : null;
+        }
+      } catch {}
+      return null;
+    }
+
+    async function fetchLastConfirmedBlockAvgFee() {
+      try {
+        const blocks = await fetch('https://mempool.space/api/blocks').then(r => r.json());
+        if (Array.isArray(blocks) && blocks[0] && blocks[0].id) {
+          const b = await fetch(`https://mempool.space/api/block/${blocks[0].id}`).then(r => r.json());
+          // avg sats/vB = total_fees_sat / vbytes; vbytes = weight/4
+          if (b && typeof b.fees === 'number' && typeof b.weight === 'number' && b.weight > 0) {
+            const vbytes = b.weight / 4;
+            const rate = Math.round(b.fees / vbytes);
+            return rate > 0 ? rate : null;
+          }
+        }
+      } catch {}
+      return null;
+    }
+
+    async function fetchRecommendedFee() {
+      try {
+        const rec = await fetch('https://mempool.space/api/v1/fees/recommended').then(r => r.json());
+        const pick = [rec?.halfHourFee, rec?.fastestFee, rec?.hourFee, rec?.economyFee, rec?.minimumFee].find(v => typeof v === 'number' && v > 0);
+        return pick ?? null;
+      } catch {}
+      return null;
+    }
+
+    async function refreshAvgFee() {
+      let val = await fetchNextBlockMedianFee();
+      if (val == null) val = await fetchLastConfirmedBlockAvgFee();
+      if (val == null) val = await fetchRecommendedFee();
+      avgFeeElem.textContent = val != null ? val : '--';
+    }
+
     async function fetchSnapshot() {
       try {
         const [blocksResp, mempoolResp] = await Promise.all([
@@ -400,20 +443,7 @@
 
         if (blocks && blocks[0]) blockElem.textContent = blocks[0].height;
         if (mempool && typeof mempool.count === 'number') mempoolElem.textContent = mempool.count.toLocaleString();
-
-        let avgFee = null;
-        avgFee = computeAvgFeeFromHistogram(mempool && mempool.fee_histogram);
-        if (avgFee == null && mempool && typeof mempool.total_fee === 'number' && typeof mempool.vsize === 'number' && mempool.vsize > 0) {
-          avgFee = Math.round(mempool.total_fee / mempool.vsize);
-        }
-        if (avgFee == null) {
-          try {
-            const rec = await fetch('https://mempool.space/api/v1/fees/recommended').then(r => r.json());
-            const candidates = [rec && rec.halfHourFee, rec && rec.fastestFee, rec && rec.hourFee, rec && rec.economyFee, rec && rec.minimumFee];
-            avgFee = candidates.find(v => typeof v === 'number') ?? null;
-          } catch {}
-        }
-        if (avgFee != null) avgFeeElem.textContent = avgFee; else avgFeeElem.textContent = '--';
+        await refreshAvgFee();
       } catch (err) {
         console.error('REST fetch error:', err);
       }
@@ -429,11 +459,8 @@
           if (d.mempoolInfo) {
             const info = d.mempoolInfo;
             if (typeof info.count === 'number') mempoolElem.textContent = info.count.toLocaleString();
-            const totalFee = (typeof info.total_fee === 'number') ? info.total_fee : (typeof info.totalFee === 'number' ? info.totalFee : null);
-            const vsize = (typeof info.vsize === 'number') ? info.vsize : (typeof info.vSize === 'number' ? info.vSize : (typeof info.total_vsize === 'number' ? info.total_vsize : (typeof info.totalVsize === 'number' ? info.totalVsize : null)));
-            if (totalFee != null && vsize && vsize > 0) {
-              avgFeeElem.textContent = Math.round(totalFee / vsize);
-            }
+            // Update avg fee using next-block median for accuracy
+            refreshAvgFee();
           }
         } catch {}
       };
@@ -443,6 +470,7 @@
     fetchSnapshot();
     connectWS();
     setInterval(fetchSnapshot, 60000);
+    setInterval(refreshAvgFee, 30000);
   })();
   </script>
 
