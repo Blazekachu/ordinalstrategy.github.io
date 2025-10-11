@@ -42,11 +42,11 @@
       z-index: 1000;
       box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
       backdrop-filter: blur(10px);
-      height: 48px;
+      height: 72px;
     }
 
     .logo img {
-      height: 28px;
+      height: 42px;
       width: auto;
       object-fit: contain;
       transition: transform 0.3s ease;
@@ -80,7 +80,7 @@
       position: fixed;
       left: 0;
       right: 0;
-      bottom: 48px; /* directly adjacent above the footer/header */
+      bottom: 72px; /* directly adjacent above the footer/header */
       background: #0f1116;
       backdrop-filter: blur(4px);
       padding: 2px 10%;
@@ -373,6 +373,22 @@
     const mempoolElem = document.getElementById('mempool-count');
     const avgFeeElem = document.getElementById('avg-fee');
 
+    function computeAvgFeeFromHistogram(histogram) {
+      if (!Array.isArray(histogram)) return null;
+      let weightedFeeVsize = 0;
+      let totalVsize = 0;
+      for (const entry of histogram) {
+        const feeRate = Array.isArray(entry) ? entry[0] : undefined;
+        const vsize = Array.isArray(entry) ? entry[1] : undefined;
+        if (typeof feeRate === 'number' && typeof vsize === 'number') {
+          weightedFeeVsize += feeRate * vsize;
+          totalVsize += vsize;
+        }
+      }
+      if (totalVsize <= 0) return null;
+      return Math.round(weightedFeeVsize / totalVsize);
+    }
+
     async function fetchSnapshot() {
       try {
         const [blocksResp, mempoolResp] = await Promise.all([
@@ -383,8 +399,21 @@
         const mempool = await mempoolResp.json();
 
         if (blocks && blocks[0]) blockElem.textContent = blocks[0].height;
-        if (mempool && mempool.count) mempoolElem.textContent = mempool.count.toLocaleString();
-        if (mempool && mempool.vbytes_per_fee) avgFeeElem.textContent = Math.round(mempool.vbytes_per_fee['1'] || 0);
+        if (mempool && typeof mempool.count === 'number') mempoolElem.textContent = mempool.count.toLocaleString();
+
+        let avgFee = null;
+        avgFee = computeAvgFeeFromHistogram(mempool && mempool.fee_histogram);
+        if (avgFee == null && mempool && typeof mempool.total_fee === 'number' && typeof mempool.vsize === 'number' && mempool.vsize > 0) {
+          avgFee = Math.round(mempool.total_fee / mempool.vsize);
+        }
+        if (avgFee == null) {
+          try {
+            const rec = await fetch('https://mempool.space/api/v1/fees/recommended').then(r => r.json());
+            const candidates = [rec && rec.halfHourFee, rec && rec.fastestFee, rec && rec.hourFee, rec && rec.economyFee, rec && rec.minimumFee];
+            avgFee = candidates.find(v => typeof v === 'number') ?? null;
+          } catch {}
+        }
+        if (avgFee != null) avgFeeElem.textContent = avgFee; else avgFeeElem.textContent = '--';
       } catch (err) {
         console.error('REST fetch error:', err);
       }
@@ -398,8 +427,13 @@
           const d = JSON.parse(e.data);
           if (d.block) blockElem.textContent = d.block.height;
           if (d.mempoolInfo) {
-            mempoolElem.textContent = d.mempoolInfo.count.toLocaleString();
-            avgFeeElem.textContent = Math.round(d.mempoolInfo.vbytes_per_fee['1'] || 0);
+            const info = d.mempoolInfo;
+            if (typeof info.count === 'number') mempoolElem.textContent = info.count.toLocaleString();
+            const totalFee = (typeof info.total_fee === 'number') ? info.total_fee : (typeof info.totalFee === 'number' ? info.totalFee : null);
+            const vsize = (typeof info.vsize === 'number') ? info.vsize : (typeof info.vSize === 'number' ? info.vSize : (typeof info.total_vsize === 'number' ? info.total_vsize : (typeof info.totalVsize === 'number' ? info.totalVsize : null)));
+            if (totalFee != null && vsize && vsize > 0) {
+              avgFeeElem.textContent = Math.round(totalFee / vsize);
+            }
           }
         } catch {}
       };
