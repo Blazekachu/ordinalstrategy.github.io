@@ -339,6 +339,7 @@
       position: relative;
       z-index: 1;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      pointer-events: auto; /* allow interactions */
     }
     .overlay-title { font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; color: #f7931a; margin-bottom: 8px; }
     .overlay-quote {
@@ -526,17 +527,20 @@
     // === Landing overlay gate ===
     function hideOverlay() {
       if (overlay) overlay.setAttribute('hidden', '');
-      stopMatrix();
+      if (typeof stopMatrix === 'function') stopMatrix();
     }
     function showOverlay() {
       if (overlay) overlay.removeAttribute('hidden');
-      startMatrix();
+      // Defer until matrix variables/functions are defined
+      setTimeout(() => { if (typeof startMatrix === 'function') startMatrix(); }, 0);
     }
     try {
       if (localStorage.getItem('os_gate_passed') === '1') hideOverlay();
       else showOverlay();
     } catch { /* storage may be blocked; default show */ showOverlay(); }
     if (overlayTrueBtn) {
+      // Ensure button can receive clicks over pointer-events:none containers
+      overlayTrueBtn.style.pointerEvents = 'auto';
       overlayTrueBtn.addEventListener('click', () => {
         try { localStorage.setItem('os_gate_passed', '1'); } catch {}
         hideOverlay();
