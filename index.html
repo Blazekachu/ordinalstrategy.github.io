@@ -35,17 +35,18 @@
       bottom: 0;
       left: 0;
       background: rgba(0,0,0,0.8);
-      padding: 20px 10%;
+      padding: 8px 10%;
       display: flex; 
       justify-content: space-between; 
       align-items: center;
       z-index: 1000;
       box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
       backdrop-filter: blur(10px);
+      height: 56px;
     }
 
     .logo img {
-      height: 150px;
+      height: 40px;
       width: auto;
       object-fit: contain;
       transition: transform 0.3s ease;
@@ -70,8 +71,30 @@
       background: rgba(0, 0, 0, 0.5);
       border-radius: 12px;
       padding: 8px 16px;
-      margin-top: 10px;
+      margin-top: 0;
       box-shadow: 0 0 10px #f7931a44;
+    }
+
+    /* Thin live mempool bar above footer */
+    #mempool-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 56px; /* sits just above the footer/header */
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      padding: 4px 10%;
+      z-index: 1001;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    #mempool-bar #live-data {
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.95rem;
+      justify-content: center;
     }
 
     /* ---------- HERO ---------- */
@@ -233,12 +256,15 @@
       <a href="#team">Team</a>
       <a href="#community">Community</a>
     </nav>
+  </header>
+
+  <div id="mempool-bar">
     <div id="live-data">
       <span>🟠 Block: <span id="block-height">--</span></span>
       <span>Txns: <span id="mempool-count">--</span></span>
       <span>Avg Fee: <span id="avg-fee">--</span> sats/vB</span>
     </div>
-  </header>
+  </div>
 
   <div id="progress-container">
     <div id="progress-bar"></div>
