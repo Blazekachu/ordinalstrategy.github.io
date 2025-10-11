@@ -234,6 +234,33 @@
       object-fit: contain;
       filter: drop-shadow(0 0 8px #f7931a);
     }
+
+    /* ---------- CENTER GLASS PRICE BAR ---------- */
+    #price-bar {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(20, 22, 28, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 8px 16px;
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+      color: #eaeaea;
+      z-index: 1002;
+      pointer-events: none; /* never blocks clicks */
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+    }
+    #price-bar .sep { color: #ffffff33; }
+    #btc-price { color: #ffd166; font-variant-numeric: tabular-nums; }
+    .price-change { font-variant-numeric: tabular-nums; }
+    .price-change.positive { color: #36d399; }
+    .price-change.negative { color: #ef4444; }
   </style>
 </head>
 <body>
@@ -265,6 +292,16 @@
 
   <div id="scroll-rocket">
     <img src="rocket.png" alt="Scroll Up Rocket">
+  </div>
+
+  <div id="price-bar">
+    <span id="btc-price">$--</span>
+    <span class="sep">|</span>
+    <span>7d: <span id="change-7d" class="price-change">--</span></span>
+    <span class="sep">|</span>
+    <span>30d: <span id="change-30d" class="price-change">--</span></span>
+    <span class="sep">|</span>
+    <span>1m: <span id="change-1m" class="price-change">--</span></span>
   </div>
 
   <div class="site" id="site">
@@ -373,6 +410,74 @@
     const mempoolElem = document.getElementById('mempool-count');
     const avgFeeElem = document.getElementById('avg-fee');
 
+    // === BTC Price & Changes ===
+    const btcPriceElem = document.getElementById('btc-price');
+    const change7dElem = document.getElementById('change-7d');
+    const change30dElem = document.getElementById('change-30d');
+    const change1mElem = document.getElementById('change-1m');
+
+    function formatUsd(value) {
+      try {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+      } catch { return `$${Math.round(value).toLocaleString('en-US')}`; }
+    }
+
+    function setChange(elem, pct) {
+      if (!elem) return;
+      elem.classList.remove('positive', 'negative');
+      if (typeof pct === 'number') {
+        const rounded = (Math.round(pct * 100) / 100).toFixed(2);
+        const signed = (pct >= 0 ? '+' : '') + rounded + '%';
+        elem.textContent = signed;
+        elem.classList.add(pct >= 0 ? 'positive' : 'negative');
+      } else {
+        elem.textContent = '--';
+      }
+    }
+
+    async function fetchCoinGeckoPrimary() {
+      const url = 'https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('coingecko primary failed');
+      const d = await res.json();
+      const price = d?.market_data?.current_price?.usd;
+      const p7d = d?.market_data?.price_change_percentage_7d_in_currency?.usd;
+      const p30d = d?.market_data?.price_change_percentage_30d_in_currency?.usd;
+      return { price, p7d, p30d };
+    }
+
+    async function fetchCoinGeckoMarkets() {
+      const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&price_change_percentage=7d,30d';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('coingecko markets failed');
+      const arr = await res.json();
+      const d = Array.isArray(arr) ? arr[0] : null;
+      const price = d?.current_price;
+      const p7d = d?.price_change_percentage_7d_in_currency;
+      const p30d = d?.price_change_percentage_30d_in_currency;
+      return { price, p7d, p30d };
+    }
+
+    async function refreshPrice() {
+      try {
+        let data = await fetchCoinGeckoPrimary();
+        if (!data || data.price == null) data = await fetchCoinGeckoMarkets();
+        const { price, p7d, p30d } = data || {};
+        if (typeof price === 'number') btcPriceElem.textContent = formatUsd(price);
+        else btcPriceElem.textContent = '$--';
+        setChange(change7dElem, typeof p7d === 'number' ? p7d : null);
+        setChange(change30dElem, typeof p30d === 'number' ? p30d : null);
+        // Map 1m to 30d change
+        setChange(change1mElem, typeof p30d === 'number' ? p30d : null);
+      } catch (e) {
+        // fallback to keep UI sensible
+        btcPriceElem.textContent = '$--';
+        setChange(change7dElem, null);
+        setChange(change30dElem, null);
+        setChange(change1mElem, null);
+      }
+    }
+
     function computeAvgFeeFromHistogram(histogram) {
       if (!Array.isArray(histogram)) return null;
       let weightedFeeVsize = 0;
@@ -471,6 +576,8 @@
     connectWS();
     setInterval(fetchSnapshot, 60000);
     setInterval(refreshAvgFee, 30000);
+    refreshPrice();
+    setInterval(refreshPrice, 60000);
   })();
   </script>
 
