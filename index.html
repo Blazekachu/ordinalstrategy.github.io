@@ -401,7 +401,7 @@
       <div id="overlay-title" class="overlay-title">Bitcoin Genesis — 03 Jan 2009</div>
       <div class="overlay-quote">“The Times 03/Jan/2009 Chancellor on brink of second bailout for banks”</div>
       <div class="overlay-actions">
-        <button id="overlay-true-btn" type="button">TRUE</button>
+        <button id="overlay-true-btn" type="button" onclick="(function(){try{localStorage.setItem('os_gate_passed','1');}catch(e){};var o=document.getElementById('landing-overlay');if(o){o.setAttribute('hidden','');}})()">TRUE</button>
       </div>
     </div>
   </div>
