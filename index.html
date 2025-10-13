@@ -140,6 +140,16 @@
       backdrop-filter: blur(4px) saturate(120%);
       -webkit-backdrop-filter: blur(4px) saturate(120%);
     }
+    .glass-chunk {
+      display: inline-block;
+      padding: 24px 28px;
+      width: -moz-fit-content;
+      width: fit-content;
+      max-width: 960px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .about, .community, .mechanics, .hero { text-align: center; }
 
     .about p { text-align: center; max-width: 700px; margin: 0 auto; }
     .community p { text-align: center; max-width: 700px; margin: 0 auto; }
@@ -474,38 +484,54 @@
 
     <footer>© 2025 OrdinalStrategy.fun — Built with precision on Bitcoin.</footer>
 
-    <section id="community" class="community glass-panel">
-      <h3 class="section-title">Join the Movement</h3>
-      <p>Ordinals are the art of precision join us in mastering the strategy.</p>
-      <div class="socials">
-        <a href="https://github.com/Blazekachu/ordinalstrategy.github.io" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="#" id="join-now-btn">join now</a>
+    <section id="community" class="community">
+      <div class="glass-panel glass-chunk">
+        <h3 class="section-title" style="text-align:center;">Join the Movement</h3>
+        <p style="text-align:center;">Ordinals are the art of precision join us in mastering the strategy.</p>
+        <div class="socials">
+          <a href="https://github.com/Blazekachu/ordinalstrategy.github.io" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="#" id="join-now-btn">join now</a>
+        </div>
       </div>
     </section>
 
     
 
-    <section id="mechanics" class="mechanics glass-panel">
-      <h3 class="section-title">How It Works</h3>
-      <div class="mechanics-grid">
-        <div><h4>🔍 Track</h4><p>Monitor Ordinal activity across blocks with precision.</p></div>
-        <div><h4>⚙️ Analyze</h4><p>Study rarity, metadata, and market behavior in real time.</p></div>
-        <div><h4>🧾 Curate</h4><p>Organize collections and optimize your strategy portfolio.</p></div>
-        <div><h4>🔗 Share</h4><p>Collaborate and share your research across the ecosystem.</p></div>
+    <section id="mechanics" class="mechanics">
+      <div class="glass-panel glass-chunk">
+        <h3 class="section-title" style="text-align:center;">How It Works</h3>
+        <div class="mechanics-grid">
+          <div class="glass-panel" style="padding:20px;">
+            <h4>🔍 Track</h4><p>Monitor Ordinal activity across blocks with precision.</p>
+          </div>
+          <div class="glass-panel" style="padding:20px;">
+            <h4>⚙️ Analyze</h4><p>Study rarity, metadata, and market behavior in real time.</p>
+          </div>
+          <div class="glass-panel" style="padding:20px;">
+            <h4>🧾 Curate</h4><p>Organize collections and optimize your strategy portfolio.</p>
+          </div>
+          <div class="glass-panel" style="padding:20px;">
+            <h4>🔗 Share</h4><p>Collaborate and share your research across the ecosystem.</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section id="about" class="about glass-panel">
-      <h3 class="section-title">Why Ordinal Strategy?</h3>
-      <p>We blend research, on-chain tools, and market data to empower collectors and creators. With precise insights and curated analytics, we help decode the Bitcoin Ordinals ecosystem for strategic advantage.</p>
+    <section id="about" class="about">
+      <div class="glass-panel glass-chunk">
+        <h3 class="section-title" style="text-align:center;">Why Ordinal Strategy?</h3>
+        <p style="text-align:center;">We blend research, on-chain tools, and market data to empower collectors and creators. With precise insights and curated analytics, we help decode the Bitcoin Ordinals ecosystem for strategic advantage.</p>
+      </div>
     </section>
 
-    <section class="hero glass-panel">
-      <h2>Precision in the World of Bitcoin Ordinals</h2>
-      <p>Ordinal Strategy is a framework for research, tracking, and optimization across Bitcoin Ordinals, built for collectors, creators, and strategists.</p>
-      <div class="buttons">
-        <a href="#mechanics">Explore Strategy</a>
-        <a href="#about">Learn More</a>
+    <section class="hero">
+      <div class="glass-panel glass-chunk" style="text-align:center;">
+        <h2>Precision in the World of Bitcoin Ordinals</h2>
+        <p>Ordinal Strategy is a framework for research, tracking, and optimization across Bitcoin Ordinals, built for collectors, creators, and strategists.</p>
+        <div class="buttons">
+          <a href="#mechanics">Explore Strategy</a>
+          <a href="#about">Learn More</a>
+        </div>
       </div>
     </section>
 
