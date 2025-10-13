@@ -34,7 +34,8 @@
 
     header { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
     header .logo { display: flex; align-items: center; gap: 10px; }
-    header img { height: 28px; }
+    header img { display: block; }
+    .brand-logo { height: 100px; width: auto; }
     header a { color: #f1f1f1; text-decoration: none; }
   </style>
 </head>
@@ -42,8 +43,7 @@
   <div class="container">
     <header>
       <div class="logo">
-        <img src="osfun.png" alt="Ordinal Strategy" />
-        <strong>Ordinal Strategy</strong>
+        <img class="brand-logo" src="logo.png" alt="Ordinal Strategy" />
       </div>
       <a href="index.html">Home</a>
     </header>
@@ -168,13 +168,22 @@
 
       async function connect(){
         setStatus('Detecting wallet...');
+        // Xverse injects window.XverseProviders?.BitcoinProvider (EIP-1193-like)
+        const hasXverse = !!(window.XverseProviders && window.XverseProviders.BitcoinProvider);
         const hasBtc = typeof window.btc !== 'undefined' && typeof window.btc.request === 'function';
         const hasUnisat = typeof window.unisat !== 'undefined';
         const hasOkx = typeof window.okxwallet !== 'undefined' && window.okxwallet.bitcoin && typeof window.okxwallet.bitcoin.request === 'function';
 
         let payment=null, ordinals=null;
         try {
-          if (hasBtc){
+          if (hasXverse) {
+            // Try Xverse provider first
+            const provider = window.XverseProviders.BitcoinProvider;
+            try { await provider.request('requestAccounts'); } catch {}
+            const addrs = await provider.request('getAddresses');
+            ({ payment, ordinals } = pickFromBtcAddresses(addrs));
+            setStatus('Connected via Xverse');
+          } else if (hasBtc){
             try { await window.btc.request('requestAccounts'); } catch {}
             const addrs = await window.btc.request('getAddresses');
             ({ payment, ordinals } = pickFromBtcAddresses(addrs));
