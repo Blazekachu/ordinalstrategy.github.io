@@ -103,7 +103,7 @@
     /* ---------- HERO ---------- */
     .hero {
       height: 100vh;
-      background: radial-gradient(circle at top, #1b1c1f 0%, #0b0c10 100%);
+      background: transparent; /* let matrix show through */
       display: flex; 
       flex-direction: column; 
       justify-content: center; 
@@ -133,12 +133,12 @@
     .section-title { font-size: 2rem; color: #f7931a; margin-bottom: 25px; text-align: center; }
     /* Glass panel utility */
     .glass-panel {
-      background: rgba(20, 22, 28, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(10, 12, 16, 0.28);
+      border: 1px solid rgba(247, 147, 26, 0.18);
       border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
-      backdrop-filter: blur(10px) saturate(120%);
-      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      box-shadow: 0 6px 28px rgba(247,147,26,0.12), 0 2px 8px rgba(0,0,0,0.35);
+      backdrop-filter: blur(4px) saturate(120%);
+      -webkit-backdrop-filter: blur(4px) saturate(120%);
     }
 
     .about p { text-align: center; max-width: 700px; margin: 0 auto; }
@@ -545,17 +545,22 @@
 
     function drawSiteMatrixFrame() {
       if (!siteMatrixRunning || !siteMatrixCtx) return;
-      // Slight fade to create trails
-      siteMatrixCtx.fillStyle = 'rgba(0,0,0,0.08)';
+      // Slight fade to create trails (lighter to keep digits visible)
+      siteMatrixCtx.globalCompositeOperation = 'source-over';
+      siteMatrixCtx.fillStyle = 'rgba(0,0,0,0.05)';
       siteMatrixCtx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
       for (let i = 0; i < siteMatrixCols; i++) {
         const char = Math.random() < 0.5 ? '0' : '1';
         const x = i * siteMatrixFontSize;
         const y = siteMatrixDrops[i] * siteMatrixFontSize;
-        const highlight = Math.random() < 0.05;
+        const highlight = Math.random() < 0.06;
+        // Glow effect for digits
+        siteMatrixCtx.shadowColor = highlight ? 'rgba(255,255,255,0.8)' : 'rgba(247,147,26,0.6)';
+        siteMatrixCtx.shadowBlur = highlight ? 8 : 6;
         siteMatrixCtx.fillStyle = highlight ? '#ffffff' : '#f7931a';
         siteMatrixCtx.fillText(char, x, y);
+        siteMatrixCtx.shadowBlur = 0;
 
         if (y > window.innerHeight && Math.random() > 0.975) siteMatrixDrops[i] = 0;
         else siteMatrixDrops[i]++;
