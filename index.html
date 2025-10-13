@@ -28,6 +28,16 @@
       scroll-snap-type: y mandatory;
     }
 
+    /* ---------- SITE MATRIX BACKGROUND ---------- */
+    #site-matrix-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     /* ---------- HEADER ---------- */
     header {
       position: fixed;
@@ -121,6 +131,15 @@
 
     /* ---------- SECTIONS ---------- */
     .section-title { font-size: 2rem; color: #f7931a; margin-bottom: 25px; text-align: center; }
+    /* Glass panel utility */
+    .glass-panel {
+      background: rgba(20, 22, 28, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+    }
 
     .about p { text-align: center; max-width: 700px; margin: 0 auto; }
     .community p { text-align: center; max-width: 700px; margin: 0 auto; }
@@ -133,12 +152,11 @@
       margin-top: 40px;
     }
     .mechanics-grid div {
-      background: #111317;
       padding: 30px;
       border-radius: 15px;
       transition: 0.3s;
     }
-    .mechanics-grid div:hover { background: #1d1f25; }
+    .mechanics-grid div:hover { filter: brightness(1.08); }
 
     .roadmap ul {
       list-style: none;
@@ -393,6 +411,7 @@
   </style>
 </head>
 <body>
+  <canvas id="site-matrix-canvas"></canvas>
 
   <header>
     <div class="logo">
@@ -455,7 +474,7 @@
 
     <footer>© 2025 OrdinalStrategy.fun — Built with precision on Bitcoin.</footer>
 
-    <section id="community" class="community">
+    <section id="community" class="community glass-panel">
       <h3 class="section-title">Join the Movement</h3>
       <p>Ordinals are the art of precision join us in mastering the strategy.</p>
       <div class="socials">
@@ -466,7 +485,7 @@
 
     
 
-    <section id="mechanics" class="mechanics">
+    <section id="mechanics" class="mechanics glass-panel">
       <h3 class="section-title">How It Works</h3>
       <div class="mechanics-grid">
         <div><h4>🔍 Track</h4><p>Monitor Ordinal activity across blocks with precision.</p></div>
@@ -476,12 +495,12 @@
       </div>
     </section>
 
-    <section id="about" class="about">
+    <section id="about" class="about glass-panel">
       <h3 class="section-title">Why Ordinal Strategy?</h3>
       <p>We blend research, on-chain tools, and market data to empower collectors and creators. With precise insights and curated analytics, we help decode the Bitcoin Ordinals ecosystem for strategic advantage.</p>
     </section>
 
-    <section class="hero">
+    <section class="hero glass-panel">
       <h2>Precision in the World of Bitcoin Ordinals</h2>
       <p>Ordinal Strategy is a framework for research, tracking, and optimization across Bitcoin Ordinals, built for collectors, creators, and strategists.</p>
       <div class="buttons">
@@ -499,6 +518,74 @@
     const rocket = document.getElementById('scroll-rocket');
     const overlay = document.getElementById('landing-overlay');
     const overlayTrueBtn = document.getElementById('overlay-true-btn');
+
+    // === Site-wide Matrix Background ===
+    const siteMatrixCanvas = document.getElementById('site-matrix-canvas');
+    let siteMatrixRunning = false;
+    let siteMatrixCols = 0;
+    let siteMatrixDrops = [];
+    let siteMatrixFontSize = 12;
+    let siteMatrixCtx = null;
+
+    function initSiteMatrixSize() {
+      if (!siteMatrixCanvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      siteMatrixCanvas.width = window.innerWidth * dpr;
+      siteMatrixCanvas.height = window.innerHeight * dpr;
+      siteMatrixCanvas.style.width = window.innerWidth + 'px';
+      siteMatrixCanvas.style.height = window.innerHeight + 'px';
+      siteMatrixCtx = siteMatrixCanvas.getContext('2d');
+      siteMatrixCtx.setTransform(1, 0, 0, 1, 0, 0);
+      siteMatrixCtx.scale(dpr, dpr);
+      siteMatrixFontSize = 12;
+      siteMatrixCols = Math.max(1, Math.floor(window.innerWidth / siteMatrixFontSize));
+      siteMatrixDrops = new Array(siteMatrixCols).fill(0);
+      siteMatrixCtx.font = `${siteMatrixFontSize}px monospace`;
+    }
+
+    function drawSiteMatrixFrame() {
+      if (!siteMatrixRunning || !siteMatrixCtx) return;
+      // Slight fade to create trails
+      siteMatrixCtx.fillStyle = 'rgba(0,0,0,0.08)';
+      siteMatrixCtx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+      for (let i = 0; i < siteMatrixCols; i++) {
+        const char = Math.random() < 0.5 ? '0' : '1';
+        const x = i * siteMatrixFontSize;
+        const y = siteMatrixDrops[i] * siteMatrixFontSize;
+        const highlight = Math.random() < 0.05;
+        siteMatrixCtx.fillStyle = highlight ? '#ffffff' : '#f7931a';
+        siteMatrixCtx.fillText(char, x, y);
+
+        if (y > window.innerHeight && Math.random() > 0.975) siteMatrixDrops[i] = 0;
+        else siteMatrixDrops[i]++;
+      }
+      if (siteMatrixRunning) requestAnimationFrame(drawSiteMatrixFrame);
+    }
+
+    function startSiteMatrix() {
+      if (siteMatrixRunning) return;
+      initSiteMatrixSize();
+      siteMatrixRunning = true;
+      requestAnimationFrame(drawSiteMatrixFrame);
+    }
+
+    function stopSiteMatrix() {
+      siteMatrixRunning = false;
+    }
+
+    // Start immediately; pause when tab hidden
+    startSiteMatrix();
+    window.addEventListener('resize', () => {
+      const wasRunning = siteMatrixRunning;
+      stopSiteMatrix();
+      initSiteMatrixSize();
+      if (wasRunning) { siteMatrixRunning = true; requestAnimationFrame(drawSiteMatrixFrame); }
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopSiteMatrix();
+      else startSiteMatrix();
+    });
 
     function updateRocket() {
       const maxScroll = Math.max(1, site.scrollHeight - site.clientHeight);
