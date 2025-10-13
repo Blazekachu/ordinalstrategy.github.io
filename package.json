@@ -1,0 +1,14 @@
+{
+  "name": "ordinalstrategy-site",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Local dev server for ordinalstrategy.fun static site",
+  "scripts": {
+    "dev": "live-server --port=5173 --watch=index.html,*.png,*.css,*.js",
+    "serve": "http-server -p 5173 -c-1 ."
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "http-server": "^14.1.1"
+  }
+}
