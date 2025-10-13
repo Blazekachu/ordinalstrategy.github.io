@@ -680,7 +680,10 @@
     const ORDISCAN_API_KEY = '1494b84e-3178-4d7e-babb-b58bf91f6705';
 
     async function fetchTotalInscriptions() {
-      const headers = { 'Authorization': `Bearer ${ORDISCAN_API_KEY}` };
+      const headers = {
+        'Authorization': `Bearer ${ORDISCAN_API_KEY}`,
+        'X-Api-Key': ORDISCAN_API_KEY
+      };
       // Prefer stats/count endpoints
       try {
         const r = await fetch('https://api.ordiscan.com/v1/inscriptions/count', { headers });
@@ -703,7 +706,7 @@
         const r3 = await fetch('https://api.ordiscan.com/v1/inscriptions?limit=1&sort=inscription_number:desc', { headers });
         if (r3.ok) {
           const j3 = await r3.json();
-          const n = j3?.data && j3.data[0]?.inscription_number;
+          const n = j3?.data && (j3.data[0]?.inscription_number ?? j3.data[0]?.inscriptionNumber ?? j3.data[0]?.number);
           if (typeof n === 'number' && n > 0) return n;
         }
       } catch {}
