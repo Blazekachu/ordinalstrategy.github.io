@@ -681,33 +681,46 @@
 
     async function fetchTotalInscriptions() {
       const headers = {
+        'Accept': 'application/json',
         'Authorization': `Bearer ${ORDISCAN_API_KEY}`,
-        'X-Api-Key': ORDISCAN_API_KEY
+        'X-Api-Key': ORDISCAN_API_KEY,
+        'X-API-KEY': ORDISCAN_API_KEY
       };
-      // Prefer stats/count endpoints
+      const fetchOpts = { headers, cache: 'no-store', mode: 'cors' };
+      // Prefer Ordiscan count endpoint
       try {
-        const r = await fetch('https://api.ordiscan.com/v1/inscriptions/count', { headers });
+        const r = await fetch('https://api.ordiscan.com/v1/inscriptions/count', fetchOpts);
         if (r.ok) {
           const j = await r.json();
           const v = j?.count ?? j?.total ?? j?.data?.count;
-          if (typeof v === 'number' && v > 0) return v;
+          if (Number.isFinite(v) && v > 0) return v;
         }
       } catch {}
+      // Ordiscan stats endpoint
       try {
-        const r2 = await fetch('https://api.ordiscan.com/v1/stats', { headers });
+        const r2 = await fetch('https://api.ordiscan.com/v1/stats', fetchOpts);
         if (r2.ok) {
           const j2 = await r2.json();
-          const v2 = j2?.totalInscriptions ?? j2?.inscriptions?.total ?? j2?.total ?? j2?.count;
-          if (typeof v2 === 'number' && v2 > 0) return v2;
+          const v2 = j2?.totalInscriptions ?? j2?.inscriptions?.total ?? j2?.total ?? j2?.count ?? j2?.inscriptions_count;
+          if (Number.isFinite(v2) && v2 > 0) return v2;
         }
       } catch {}
-      // Fallback: latest inscription number
+      // Hiro ordinals API fallback (has total field, good CORS)
       try {
-        const r3 = await fetch('https://api.ordiscan.com/v1/inscriptions?limit=1&sort=inscription_number:desc', { headers });
+        const rh = await fetch('https://api.hiro.so/ordinals/v1/inscriptions?limit=1&order=desc&sort=inscription_number', { cache: 'no-store', mode: 'cors' });
+        if (rh.ok) {
+          const jh = await rh.json();
+          const th = jh?.total;
+          if (Number.isFinite(th) && th > 0) return th;
+        }
+      } catch {}
+      // Fallback: latest inscription number via Ordiscan
+      try {
+        const r3 = await fetch('https://api.ordiscan.com/v1/inscriptions?limit=1&sort=inscription_number:desc', fetchOpts);
         if (r3.ok) {
           const j3 = await r3.json();
           const n = j3?.data && (j3.data[0]?.inscription_number ?? j3.data[0]?.inscriptionNumber ?? j3.data[0]?.number);
-          if (typeof n === 'number' && n > 0) return n;
+          if (Number.isFinite(n) && n > 0) return n;
         }
       } catch {}
       return null;
