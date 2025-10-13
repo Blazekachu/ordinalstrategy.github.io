@@ -544,6 +544,7 @@
     const rocket = document.getElementById('scroll-rocket');
     const overlay = document.getElementById('landing-overlay');
     const overlayTrueBtn = document.getElementById('overlay-true-btn');
+    const joinNowBtn = document.getElementById('join-now-btn');
 
     // === Site-wide Matrix Background ===
     const siteMatrixCanvas = document.getElementById('site-matrix-canvas');
@@ -645,6 +646,14 @@
       site.scrollTop = site.scrollHeight;
       updateRocket();
     }, 150));
+
+    // Ensure Join Now navigates to profile page
+    if (joinNowBtn) {
+      joinNowBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        try { window.location.href = 'profile.html'; } catch {}
+      });
+    }
 
     // === Landing overlay gate ===
     function hideOverlay() {
