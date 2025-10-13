@@ -305,6 +305,33 @@
     .price-change.positive { color: #36d399; }
     .price-change.negative { color: #ef4444; }
 
+    /* ---------- RIGHT SIDE ORDINALS DATA BAR ---------- */
+    #ordinals-bar {
+      position: fixed;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(20, 22, 28, 0.45);
+      border: 1px solid rgba(247, 147, 26, 0.12);
+      border-radius: 14px;
+      padding: 12px 14px;
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+      color: #eaeaea;
+      z-index: 1002;
+      pointer-events: none; /* never blocks clicks */
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      font-weight: 600;
+      min-width: 200px;
+    }
+    #ordinals-bar .sep { display: none; }
+    .ordinals-label { color: #f7931a; font-size: 0.85rem; }
+    .ordinals-value { color: #ffd166; font-variant-numeric: tabular-nums; }
+
     /* ---------- PRE-LANDING OVERLAY (Matrix vibes) ---------- */
     #landing-overlay {
       position: fixed;
@@ -419,6 +446,10 @@
     <span>30d: <span id="change-30d" class="price-change">--</span></span>
     <span class="sep">|</span>
     <span>1m: <span id="change-1m" class="price-change">--</span></span>
+  </div>
+
+  <div id="ordinals-bar">
+    <div><span class="ordinals-label">Total:</span> <span id="latest-inscription" class="ordinals-value">--</span></div>
   </div>
 
   <div class="site" id="site">
@@ -644,6 +675,50 @@
       }
     }
 
+    // === Ordinals (Total Inscriptions) ===
+    const latestInscriptionElem = document.getElementById('latest-inscription');
+    const ORDISCAN_API_KEY = '1494b84e-3178-4d7e-babb-b58bf91f6705';
+
+    async function fetchTotalInscriptions() {
+      const headers = { 'Authorization': `Bearer ${ORDISCAN_API_KEY}` };
+      // Prefer stats/count endpoints
+      try {
+        const r = await fetch('https://api.ordiscan.com/v1/inscriptions/count', { headers });
+        if (r.ok) {
+          const j = await r.json();
+          const v = j?.count ?? j?.total ?? j?.data?.count;
+          if (typeof v === 'number' && v > 0) return v;
+        }
+      } catch {}
+      try {
+        const r2 = await fetch('https://api.ordiscan.com/v1/stats', { headers });
+        if (r2.ok) {
+          const j2 = await r2.json();
+          const v2 = j2?.totalInscriptions ?? j2?.inscriptions?.total ?? j2?.total ?? j2?.count;
+          if (typeof v2 === 'number' && v2 > 0) return v2;
+        }
+      } catch {}
+      // Fallback: latest inscription number
+      try {
+        const r3 = await fetch('https://api.ordiscan.com/v1/inscriptions?limit=1&sort=inscription_number:desc', { headers });
+        if (r3.ok) {
+          const j3 = await r3.json();
+          const n = j3?.data && j3.data[0]?.inscription_number;
+          if (typeof n === 'number' && n > 0) return n;
+        }
+      } catch {}
+      return null;
+    }
+
+    async function refreshOrdinalsData() {
+      try {
+        const total = await fetchTotalInscriptions();
+        latestInscriptionElem.textContent = (typeof total === 'number' && total > 0) ? total.toLocaleString() : '--';
+      } catch {
+        latestInscriptionElem.textContent = '--';
+      }
+    }
+
     async function fetchCoinGeckoPrimary() {
       const url = 'https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false';
       const res = await fetch(url);
@@ -787,6 +862,10 @@
     setInterval(refreshAvgFee, 30000);
     refreshPrice();
     setInterval(refreshPrice, 60000);
+    // Ordinals total inscriptions
+    function scheduleOrdinals() { refreshOrdinalsData(); }
+    scheduleOrdinals();
+    setInterval(scheduleOrdinals, 30000);
   })();
   </script>
 
