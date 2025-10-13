@@ -722,6 +722,46 @@
       }
     }
 
+    // === BTC Price via Coinbase (primary) ===
+    function toYyyyMmDd(date) {
+      const y = date.getUTCFullYear();
+      const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(date.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    async function fetchCoinbaseSpot(dateStr) {
+      const url = dateStr
+        ? `https://api.coinbase.com/v2/prices/BTC-USD/spot?date=${encodeURIComponent(dateStr)}`
+        : 'https://api.coinbase.com/v2/prices/BTC-USD/spot';
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error('coinbase spot failed');
+      const j = await res.json();
+      const amt = parseFloat(j?.data?.amount);
+      if (!Number.isFinite(amt)) throw new Error('coinbase amount invalid');
+      return amt;
+    }
+
+    async function fetchPriceWithChangesCoinbase() {
+      const now = new Date();
+      const price = await fetchCoinbaseSpot();
+      const d7 = new Date(now); d7.setUTCDate(now.getUTCDate() - 7);
+      const d30 = new Date(now); d30.setUTCDate(now.getUTCDate() - 30);
+
+      let p7d = null;
+      let p30d = null;
+      try {
+        const v7 = await fetchCoinbaseSpot(toYyyyMmDd(d7));
+        if (v7 > 0) p7d = ((price - v7) / v7) * 100;
+      } catch {}
+      try {
+        const v30 = await fetchCoinbaseSpot(toYyyyMmDd(d30));
+        if (v30 > 0) p30d = ((price - v30) / v30) * 100;
+      } catch {}
+
+      return { price, p7d, p30d };
+    }
+
     async function fetchCoinGeckoPrimary() {
       const url = 'https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false';
       const res = await fetch(url);
@@ -747,15 +787,19 @@
 
     async function refreshPrice() {
       try {
-        let data = await fetchCoinGeckoPrimary();
-        if (!data || data.price == null) data = await fetchCoinGeckoMarkets();
+        // Primary: Coinbase (spot + historical spot)
+        let data = await fetchPriceWithChangesCoinbase();
+        if (!data || typeof data.price !== 'number') {
+          // Fallback: CoinGecko
+          data = await fetchCoinGeckoPrimary().catch(() => null);
+          if (!data || data.price == null) data = await fetchCoinGeckoMarkets();
+        }
         const { price, p7d, p30d } = data || {};
-        if (typeof price === 'number') btcPriceElem.textContent = formatUsd(price);
-        else btcPriceElem.textContent = '$--';
-        setChange(change7dElem, typeof p7d === 'number' ? p7d : null);
-        setChange(change30dElem, typeof p30d === 'number' ? p30d : null);
+        btcPriceElem.textContent = (typeof price === 'number') ? formatUsd(price) : '$--';
+        setChange(change7dElem, Number.isFinite(p7d) ? p7d : null);
+        setChange(change30dElem, Number.isFinite(p30d) ? p30d : null);
         // Map 1m to 30d change
-        setChange(change1mElem, typeof p30d === 'number' ? p30d : null);
+        setChange(change1mElem, Number.isFinite(p30d) ? p30d : null);
       } catch (e) {
         // fallback to keep UI sensible
         btcPriceElem.textContent = '$--';
