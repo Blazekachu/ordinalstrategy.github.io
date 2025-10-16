@@ -215,6 +215,41 @@
     }
     .socials a:hover { background: #fff; }
 
+    /* Slide-to-join control */
+    .join-slider {
+      position: relative;
+      width: 260px;
+      height: 44px;
+      background: #f7931a;
+      color: #0b0c10;
+      border-radius: 999px;
+      box-shadow: 0 6px 18px rgba(247,147,26,0.35);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      user-select: none;
+      touch-action: pan-x;
+      cursor: pointer;
+      overflow: hidden;
+      gap: 8px;
+    }
+    .join-slider .label { font-weight: 800; text-transform: lowercase; pointer-events: none; }
+    .join-slider .track-fill { position: absolute; inset: 0 auto 0 0; width: var(--fill, 0%); background: rgba(255,255,255,0.18); border-radius: inherit; pointer-events: none; transition: width .04s linear; }
+    .join-slider .knob {
+      position: absolute;
+      left: 4px; top: 4px;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #0b0c10;
+      color: #f7931a; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      transition: background .2s ease;
+      will-change: transform;
+    }
+    .join-slider.active .knob { background: #111317; }
+
     /* Join Now as a scroll-right styled button */
     #join-now-btn.scroll-right-btn {
       position: relative;
@@ -526,7 +561,11 @@
         <p style="text-align:center;">Ordinals are the art of precision join us in mastering the strategy.</p>
         <div class="socials">
           <a href="https://github.com/Blazekachu/ordinalstrategy.github.io" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a href="profile.html" id="join-now-btn" class="scroll-right-btn">join now</a>
+          <div id="join-slider" class="join-slider" role="button" aria-label="slide to join">
+            <div class="track-fill"></div>
+            <div class="knob">➜</div>
+            <span class="label">slide to join</span>
+          </div>
         </div>
       </div>
     </section>
@@ -580,7 +619,8 @@
     const rocket = document.getElementById('scroll-rocket');
     const overlay = document.getElementById('landing-overlay');
     const overlayTrueBtn = document.getElementById('overlay-true-btn');
-    const joinNowBtn = document.getElementById('join-now-btn');
+    // Slide to join control
+    const joinSlider = document.getElementById('join-slider');
 
     // === Site-wide Matrix Background ===
     const siteMatrixCanvas = document.getElementById('site-matrix-canvas');
@@ -683,17 +723,50 @@
       updateRocket();
     }, 150));
 
-    // Ensure Join Now navigates to profile page (fallback)
-    if (joinNowBtn) {
-      joinNowBtn.addEventListener('click', (e) => {
-        // allow default anchor, but ensure fallback if prevented elsewhere
-        setTimeout(() => {
-          if (!document.hidden && location.hash === '') {
-            // If still on same page after a tick, force navigate
-            try { window.location.href = 'profile.html'; } catch {}
-          }
-        }, 0);
-      }, { passive: true });
+    // Join slider behavior: drag or click to fill; on full -> navigate
+    if (joinSlider) {
+      const knob = joinSlider.querySelector('.knob');
+      const fill = joinSlider.querySelector('.track-fill');
+      let dragging = false; let startX = 0; let cur = 0;
+      const maxX = () => joinSlider.clientWidth - knob.clientWidth - 8; // 4px margins both sides
+      const pct = (x) => Math.max(0, Math.min(1, x / maxX()));
+      const setUI = (x) => {
+        const p = pct(x);
+        knob.style.transform = `translateX(${x}px)`;
+        joinSlider.style.setProperty('--fill', `${Math.round(p*100)}%`);
+        fill.style.width = `${Math.round(p*100)}%`;
+      };
+      const finishIfComplete = () => {
+        if (pct(cur) >= 0.98) {
+          joinSlider.classList.add('active');
+          window.location.href = 'profile.html';
+        } else {
+          // snap back
+          cur = 0; setUI(cur); joinSlider.classList.remove('active');
+        }
+      };
+      const onMove = (clientX) => { cur = Math.max(0, Math.min(maxX(), clientX - startX)); setUI(cur); };
+      const onPointerDown = (e) => {
+        dragging = true; joinSlider.classList.add('active');
+        const rect = joinSlider.getBoundingClientRect();
+        startX = rect.left + 4 + (knob.clientWidth/2);
+        onMove(e.clientX || (e.touches && e.touches[0]?.clientX) || 0);
+      };
+      const onPointerMove = (e) => { if (!dragging) return; onMove(e.clientX || (e.touches && e.touches[0]?.clientX) || 0); };
+      const onPointerUp = () => { if (!dragging) return; dragging = false; finishIfComplete(); };
+      joinSlider.addEventListener('mousedown', onPointerDown);
+      window.addEventListener('mousemove', onPointerMove);
+      window.addEventListener('mouseup', onPointerUp);
+      joinSlider.addEventListener('touchstart', (e)=>{ onPointerDown(e.touches[0]); }, { passive: true });
+      window.addEventListener('touchmove', (e)=>{ onPointerMove(e.touches[0]); }, { passive: true });
+      window.addEventListener('touchend', onPointerUp, { passive: true });
+      // Simple click fill behavior
+      joinSlider.addEventListener('click', (e)=>{
+        if (dragging) return;
+        cur = maxX(); setUI(cur); finishIfComplete();
+      });
+      // Initialize
+      setUI(0);
     }
 
     // === Landing overlay gate ===
