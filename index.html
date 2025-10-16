@@ -215,6 +215,42 @@
     }
     .socials a:hover { background: #fff; }
 
+    /* Join Now as a scroll-right styled button */
+    #join-now-btn.scroll-right-btn {
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 48px 10px 20px;
+      background: #f7931a;
+      color: #0b0c10;
+      border-radius: 999px;
+      font-weight: 800;
+      text-transform: lowercase;
+      box-shadow: 0 6px 18px rgba(247,147,26,0.35);
+      transition: transform .2s ease, filter .2s ease, background .2s ease;
+    }
+    #join-now-btn.scroll-right-btn:hover { filter: brightness(1.06); transform: translateX(2px); }
+    #join-now-btn.scroll-right-btn::after {
+      content: '➜';
+      position: absolute;
+      right: 16px; top: 50%; transform: translateY(-50%);
+      font-size: 1.2rem;
+      color: #0b0c10;
+      animation: arrow-run .9s ease-in-out infinite alternate;
+    }
+    #join-now-btn.scroll-right-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0));
+      transform: translateX(-100%);
+      animation: shimmer 1.6s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes arrow-run { 0% { right: 22px; opacity: .65; } 100% { right: 10px; opacity: 1; } }
+    @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
     footer {
       background: #090a0d;
       text-align: center;
@@ -490,7 +526,7 @@
         <p style="text-align:center;">Ordinals are the art of precision join us in mastering the strategy.</p>
         <div class="socials">
           <a href="https://github.com/Blazekachu/ordinalstrategy.github.io" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a href="profile.html" id="join-now-btn">join now</a>
+          <a href="profile.html" id="join-now-btn" class="scroll-right-btn">join now</a>
         </div>
       </div>
     </section>
@@ -647,12 +683,17 @@
       updateRocket();
     }, 150));
 
-    // Ensure Join Now navigates to profile page
+    // Ensure Join Now navigates to profile page (fallback)
     if (joinNowBtn) {
       joinNowBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        try { window.location.href = 'profile.html'; } catch {}
-      });
+        // allow default anchor, but ensure fallback if prevented elsewhere
+        setTimeout(() => {
+          if (!document.hidden && location.hash === '') {
+            // If still on same page after a tick, force navigate
+            try { window.location.href = 'profile.html'; } catch {}
+          }
+        }, 0);
+      }, { passive: true });
     }
 
     // === Landing overlay gate ===
