@@ -477,18 +477,7 @@
       text-shadow: 0 0 6px rgba(247,147,26,0.35);
     }
     .overlay-actions { display: flex; justify-content: center; }
-    #overlay-true-btn {
-      background: #f7931a;
-      color: #0b0c10;
-      border: none;
-      border-radius: 999px;
-      padding: 10px 22px;
-      font-weight: 800;
-      font-size: 0.95rem;
-      cursor: pointer;
-      box-shadow: 0 6px 18px rgba(247,147,26,0.35);
-    }
-    #overlay-true-btn:hover { filter: brightness(1.08); }
+    /* remove old TRUE button styles (replaced by slider) */
   </style>
 </head>
 <body>
@@ -527,7 +516,11 @@
       <div id="overlay-title" class="overlay-title">Bitcoin Genesis — 03 Jan 2009</div>
       <div class="overlay-quote">“The Times 03/Jan/2009 Chancellor on brink of second bailout for banks”</div>
       <div class="overlay-actions">
-        <button id="overlay-true-btn" type="button" onclick="(function(){try{localStorage.setItem('os_gate_passed','1');}catch(e){};var o=document.getElementById('landing-overlay');if(o){o.setAttribute('hidden','');}})()">TRUE</button>
+        <div id="overlay-true-slider" class="join-slider" role="button" aria-label="slide to enter">
+          <div class="track-fill"></div>
+          <div class="knob">➜</div>
+          <span class="label">TRUE</span>
+        </div>
       </div>
     </div>
   </div>
@@ -619,6 +612,7 @@
     const rocket = document.getElementById('scroll-rocket');
     const overlay = document.getElementById('landing-overlay');
     const overlayTrueBtn = document.getElementById('overlay-true-btn');
+    const overlayTrueSlider = document.getElementById('overlay-true-slider');
     // Slide to join control
     const joinSlider = document.getElementById('join-slider');
 
@@ -790,6 +784,52 @@
         try { localStorage.setItem('os_gate_passed', '1'); } catch {}
         hideOverlay();
       });
+    }
+    // TRUE slide-to-enter control
+    if (overlayTrueSlider) {
+      const knob2 = overlayTrueSlider.querySelector('.knob');
+      const fill2 = overlayTrueSlider.querySelector('.track-fill');
+      let dragging2 = false; let startX2 = 0; let cur2 = 0;
+      const maxX2 = () => overlayTrueSlider.clientWidth - knob2.clientWidth - 8;
+      const pct2 = (x) => Math.max(0, Math.min(1, x / maxX2()));
+      const setUI2 = (x) => {
+        const p = pct2(x);
+        knob2.style.transform = `translateX(${x}px)`;
+        overlayTrueSlider.style.setProperty('--fill', `${Math.round(p*100)}%`);
+        fill2.style.width = `${Math.round(p*100)}%`;
+      };
+      const completeEnter = () => {
+        try { localStorage.setItem('os_gate_passed','1'); } catch {}
+        hideOverlay();
+      };
+      const finishIfComplete2 = () => {
+        if (pct2(cur2) >= 0.98) {
+          overlayTrueSlider.classList.add('active');
+          completeEnter();
+        } else {
+          cur2 = 0; setUI2(cur2); overlayTrueSlider.classList.remove('active');
+        }
+      };
+      const onMove2 = (clientX) => { cur2 = Math.max(0, Math.min(maxX2(), clientX - startX2)); setUI2(cur2); };
+      const onPointerDown2 = (e) => {
+        dragging2 = true; overlayTrueSlider.classList.add('active');
+        const rect = overlayTrueSlider.getBoundingClientRect();
+        startX2 = rect.left + 4 + (knob2.clientWidth/2);
+        onMove2(e.clientX || (e.touches && e.touches[0]?.clientX) || 0);
+      };
+      const onPointerMove2 = (e) => { if (!dragging2) return; onMove2(e.clientX || (e.touches && e.touches[0]?.clientX) || 0); };
+      const onPointerUp2 = () => { if (!dragging2) return; dragging2 = false; finishIfComplete2(); };
+      overlayTrueSlider.addEventListener('mousedown', onPointerDown2);
+      window.addEventListener('mousemove', onPointerMove2);
+      window.addEventListener('mouseup', onPointerUp2);
+      overlayTrueSlider.addEventListener('touchstart', (e)=>{ onPointerDown2(e.touches[0]); }, { passive: true });
+      window.addEventListener('touchmove', (e)=>{ onPointerMove2(e.touches[0]); }, { passive: true });
+      window.addEventListener('touchend', onPointerUp2, { passive: true });
+      overlayTrueSlider.addEventListener('click', (e)=>{
+        if (dragging2) return;
+        cur2 = maxX2(); setUI2(cur2); finishIfComplete2();
+      });
+      setUI2(0);
     }
     document.addEventListener('keydown', (e) => {
       if (!overlay.hasAttribute('hidden') && (e.key === 'Enter')) {
