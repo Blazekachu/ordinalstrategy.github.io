@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strategy Protocol | Ordinal Strategy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- GLOBAL ---------- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b0c10;
+      color: #f1f1f1;
+      line-height: 1.6;
+    }
+
+    a { color: #f7931a; text-decoration: none; }
+    section { padding: 100px 10%; }
+
+    /* ---------- SCROLL AREA ---------- */
+    .site {
+      height: 100vh;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+    }
+
+    /* ---------- HEADER ---------- */
+    header {
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+      left: 0;
+      background: rgba(0,0,0,0.85);
+      padding: 6px 10%;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      height: 72px;
+    }
+
+    .logo img {
+      height: 42px;
+      width: auto;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .logo img:hover {
+      transform: scale(1.05);
+    }
+
+    nav a { margin: 0 10px; font-weight: 500; }
+    nav a:hover { color: #fff; }
+
+    /* ---------- MATRIX BACKGROUND ---------- */
+    #matrix-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ---------- STRATEGY CONTENT ---------- */
+    .strategy-hero {
+      height: 100vh;
+      background: radial-gradient(circle at top, #1b1c1f 0%, #0b0c10 100%);
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center;
+      text-align: center;
+      padding: 0 10%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .strategy-hero h1 { 
+      font-size: 3.2rem; 
+      margin-bottom: 20px; 
+      color: #f7931a; 
+      text-shadow: 0 0 20px rgba(247,147,26,0.5);
+    }
+
+    .strategy-hero p { 
+      font-size: 1.4rem; 
+      margin-bottom: 30px; 
+      max-width: 800px; 
+      color: #e0e0e0;
+    }
+
+    .strategy-content {
+      position: relative;
+      z-index: 1;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      margin: 40px 0;
+      border: 1px solid rgba(247,147,26,0.2);
+    }
+
+    .strategy-section {
+      margin-bottom: 60px;
+    }
+
+    .strategy-section h2 {
+      font-size: 2.2rem;
+      color: #f7931a;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .strategy-section h3 {
+      font-size: 1.6rem;
+      color: #ffd166;
+      margin-bottom: 15px;
+    }
+
+    .strategy-section p {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      color: #d0d0d0;
+    }
+
+    .protocol-flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin: 40px 0;
+    }
+
+    .flow-step {
+      background: rgba(17, 19, 23, 0.8);
+      padding: 30px;
+      border-radius: 15px;
+      border-left: 4px solid #f7931a;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .flow-step:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(247,147,26,0.2);
+    }
+
+    .flow-step h4 {
+      color: #f7931a;
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+    }
+
+    .flow-step p {
+      color: #e0e0e0;
+      font-size: 1rem;
+    }
+
+    .code-block {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(247,147,26,0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      color: #f7931a;
+      overflow-x: auto;
+    }
+
+    .highlight-box {
+      background: rgba(247,147,26,0.1);
+      border: 1px solid rgba(247,147,26,0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .highlight-box h4 {
+      color: #f7931a;
+      margin-bottom: 10px;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin: 20px 0;
+      padding: 12px 25px;
+      background: #f7931a;
+      color: #0b0c10;
+      font-weight: 600;
+      border-radius: 30px;
+      transition: 0.3s;
+      text-decoration: none;
+    }
+
+    .back-btn:hover {
+      background: #fff;
+      color: #000;
+      transform: scale(1.05);
+    }
+
+    /* ---------- PROGRESS BAR & ROCKET ---------- */
+    #progress-container {
+      position: fixed;
+      top: 0;
+      right: 18px;
+      width: 8px;
+      height: 100%;
+      background: rgba(255,255,255,0.06);
+      border-radius: 10px;
+      overflow: hidden;
+      z-index: 9998;
+    }
+    #progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2%;
+      background: #f7931a;
+      border-radius: 10px 10px 0 0;
+      box-shadow: 0 0 10px 3px rgba(247,147,26,0.45);
+      transition: height .12s linear, box-shadow .12s linear;
+    }
+
+    #scroll-rocket {
+      position: fixed;
+      right: 6px;
+      bottom: 0;
+      width: 50px;
+      height: 50px;
+      transform-origin: center center;
+      transition: bottom 0.25s linear, transform 0.3s ease;
+      z-index: 9999;
+    }
+    #scroll-rocket img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px #f7931a);
+    }
+
+    /* ---------- LIVE BITCOIN DATA ---------- */
+    #live-data {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      color: #f7931a;
+      font-weight: 600;
+      font-size: 0.95rem;
+      background: none;
+      border-radius: 0;
+      padding: 0;
+      margin: 0;
+      box-shadow: none;
+    }
+
+    /* Thin live mempool bar above footer */
+    #mempool-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 72px; /* directly adjacent above the footer/header */
+      background: #0f1116;
+      backdrop-filter: blur(4px);
+      padding: 2px 10%;
+      z-index: 1001;
+      border-top: 1px solid rgba(255,255,255,0.10);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    #mempool-bar #live-data { justify-content: center; }
+
+    footer {
+      background: #090a0d;
+      text-align: center;
+      padding: 30px;
+      color: #888;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <img src="osfun.png" alt="Ordinal Strategy Logo">
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="index.html#about">About</a>
+      <a href="index.html#mechanics">How It Works</a>
+      <a href="index.html#community">Community</a>
+      <a href="foxjump/index.html" target="_blank">Games</a>
+    </nav>
+  </header>
+
+  <div id="mempool-bar">
+    <div id="live-data">
+      <span>🟠 Block: <span id="block-height">--</span></span>
+      <span>Txns: <span id="mempool-count">--</span></span>
+      <span>Avg Fee: <span id="avg-fee">--</span> sats/vB</span>
+    </div>
+  </div>
+
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+
+  <div id="scroll-rocket">
+    <img src="rocket.png" alt="Scroll Up Rocket">
+  </div>
+
+  <canvas id="matrix-canvas"></canvas>
+
+  <div class="site" id="site">
+
+    <section class="strategy-hero">
+      <h1>Strategy Protocol</h1>
+      <p>Balancing the ecosystem through intelligent token mechanics and asset acquisition strategies</p>
+      <a href="index.html" class="back-btn">← Back to Home</a>
+    </section>
+
+    <section class="strategy-content">
+      <div class="strategy-section">
+        <h2>The Problem</h2>
+        <p>Strategy tokens currently heavily favor asset holders, creating an imbalanced ecosystem where early participants reap disproportionate benefits while new entrants face significant barriers to entry.</p>
+        
+        <div class="highlight-box">
+          <h4>Current State</h4>
+          <p>• Asset holders dominate token distribution<br>
+          • New participants face high entry barriers<br>
+          • Ecosystem growth is limited by concentration<br>
+          • Innovation is stifled by existing power structures</p>
+        </div>
+      </div>
+
+      <div class="strategy-section">
+        <h2>The Solution</h2>
+        <p>A simple protocol tweak that balances the ecosystem through intelligent spending mechanisms and dynamic token economics.</p>
+
+        <div class="protocol-flow">
+          <div class="flow-step">
+            <h4>📊 Spread the Buys</h4>
+            <p>Instead of concentrated purchases, distribute buying power across multiple assets and timeframes to reduce market impact and increase accessibility.</p>
+          </div>
+          
+          <div class="flow-step">
+            <h4>💰 Protocol Spends $N Daily</h4>
+            <p>Implement a consistent daily spending mechanism that provides predictable liquidity and market participation, regardless of market conditions.</p>
+          </div>
+          
+          <div class="flow-step">
+            <h4>⚖️ Dynamic Token Economics</h4>
+            <p>If strategy token price < threshold X, buy and burn tokens with daily budget. Otherwise, purchase assets to grow the treasury.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="strategy-section">
+        <h2>Implementation Details</h2>
+        
+        <h3>Token Price Threshold Mechanism</h3>
+        <div class="code-block">
+if (strategyTokenPrice < thresholdX) {
+    // Buy and burn tokens with daily budget
+    buyAndBurnTokens(dailyBudget);
+} else {
+    // Purchase assets to grow treasury
+    purchaseAssets(dailyBudget);
+}
+        </div>
+
+        <h3>Benefits of This Approach</h3>
+        <div class="highlight-box">
+          <h4>🎯 Balanced Growth</h4>
+          <p>• Prevents token concentration in few hands<br>
+          • Creates sustainable token economics<br>
+          • Encourages long-term participation<br>
+          • Reduces speculation and promotes utility</p>
+        </div>
+
+        <div class="highlight-box">
+          <h4>🔄 Adaptive Strategy</h4>
+          <p>• Automatically adjusts based on market conditions<br>
+          • Protects against token devaluation<br>
+          • Ensures treasury growth during bull markets<br>
+          • Maintains token scarcity during bear markets</p>
+        </div>
+      </div>
+
+      <div class="strategy-section">
+        <h2>Economic Impact</h2>
+        <p>This protocol tweak creates a self-balancing ecosystem where:</p>
+        
+        <div class="protocol-flow">
+          <div class="flow-step">
+            <h4>📈 During Bull Markets</h4>
+            <p>When token prices are high, the protocol focuses on asset acquisition, building a strong treasury foundation for future growth.</p>
+          </div>
+          
+          <div class="flow-step">
+            <h4>📉 During Bear Markets</h4>
+            <p>When token prices are low, the protocol buys and burns tokens, reducing supply and supporting price stability.</p>
+          </div>
+          
+          <div class="flow-step">
+            <h4>⚡ Continuous Activity</h4>
+            <p>Daily spending ensures consistent market participation and prevents stagnation, keeping the ecosystem dynamic and engaged.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="strategy-section">
+        <h2>Community Impact</h2>
+        <p>This approach democratizes access to strategy tokens while maintaining the integrity of the ecosystem:</p>
+        
+        <div class="highlight-box">
+          <h4>🌱 New Participant Benefits</h4>
+          <p>• Lower barriers to entry<br>
+          • Fairer token distribution<br>
+          • Reduced whale dominance<br>
+          • Increased participation opportunities</p>
+        </div>
+
+        <div class="highlight-box">
+          <h4>🏛️ Existing Holder Benefits</h4>
+          <p>• Stronger ecosystem foundation<br>
+          • Reduced volatility<br>
+          • Sustainable long-term growth<br>
+          • Enhanced token utility</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>© 2025 OrdinalStrategy.fun — Built with precision on Bitcoin.</footer>
+
+  </div>
+
+  <script>
+  (function() {
+    const site = document.getElementById('site');
+    const bar = document.getElementById('progress-bar');
+    const rocket = document.getElementById('scroll-rocket');
+
+    function updateRocket() {
+      const maxScroll = Math.max(1, site.scrollHeight - site.clientHeight);
+      const sc = site.scrollTop;
+      const pct = 1 - (sc / maxScroll);
+      bar.style.height = (pct * 100) + '%';
+
+      const travel = window.innerHeight - rocket.clientHeight - 12;
+      rocket.style.bottom = (travel * pct) + 'px';
+      const tilt = (pct * 10 - 5).toFixed(1);
+      rocket.style.transform = `rotate(${tilt}deg)`;
+
+      const glow = 8 + (pct * 36);
+      const spread = 2 + (pct * 4);
+      bar.style.boxShadow = `0 0 ${glow}px ${spread}px rgba(247,147,26,${0.45 + 0.35 * pct})`;
+      rocket.style.filter = `drop-shadow(0 0 ${glow/2}px #f7931a)`;
+    }
+
+    rocket.addEventListener('click', () => {
+      site.scrollBy({ top: -site.clientHeight, left: 0, behavior: 'smooth' });
+    });
+
+    site.addEventListener('scroll', updateRocket);
+    window.addEventListener('resize', updateRocket);
+    window.addEventListener('load', () => setTimeout(() => {
+      site.scrollTop = site.scrollHeight;
+      updateRocket();
+    }, 150));
+
+    // === Matrix animation with strategy symbols ===
+    const matrixCanvas = document.getElementById('matrix-canvas');
+    let matrixRunning = false;
+    let matrixCols = 0;
+    let matrixDrops = [];
+    let matrixFontSize = 16;
+    let matrixCtx = null;
+
+    // Strategy symbols with * as dominant character
+    const strategySymbols = ['*', '*', '*', '*', '*', '+', '-', '/', '#', '@'];
+    const symbolWeights = [0.4, 0.4, 0.4, 0.4, 0.4, 0.1, 0.1, 0.1, 0.1, 0.1]; // * gets 50% weight
+
+    function getRandomSymbol() {
+      const rand = Math.random();
+      let cumulative = 0;
+      for (let i = 0; i < strategySymbols.length; i++) {
+        cumulative += symbolWeights[i];
+        if (rand <= cumulative) {
+          return strategySymbols[i];
+        }
+      }
+      return '*'; // fallback
+    }
+
+    function initMatrixSize() {
+      if (!matrixCanvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      matrixCanvas.width = window.innerWidth * dpr;
+      matrixCanvas.height = window.innerHeight * dpr;
+      matrixCanvas.style.width = window.innerWidth + 'px';
+      matrixCanvas.style.height = window.innerHeight + 'px';
+      matrixCtx = matrixCanvas.getContext('2d');
+      matrixCtx.setTransform(1, 0, 0, 1, 0, 0);
+      matrixCtx.scale(dpr, dpr);
+      matrixFontSize = 14; // CSS pixels
+      matrixCols = Math.max(1, Math.floor(window.innerWidth / matrixFontSize));
+      matrixDrops = new Array(matrixCols).fill(0);
+      matrixCtx.font = `${matrixFontSize}px monospace`;
+    }
+
+    function drawMatrixFrame() {
+      if (!matrixRunning || !matrixCtx) return;
+      // Fade the canvas slightly to create trails
+      matrixCtx.fillStyle = 'rgba(0,0,0,0.08)';
+      matrixCtx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+      for (let i = 0; i < matrixCols; i++) {
+        const char = getRandomSymbol();
+        const x = i * matrixFontSize;
+        const y = matrixDrops[i] * matrixFontSize;
+        const highlight = Math.random() < 0.08;
+        
+        // Different colors for different symbols
+        if (char === '*') {
+          matrixCtx.fillStyle = highlight ? '#ffffff' : '#f7931a';
+        } else if (char === '+') {
+          matrixCtx.fillStyle = highlight ? '#ffd166' : '#36d399';
+        } else if (char === '-') {
+          matrixCtx.fillStyle = highlight ? '#ffd166' : '#ef4444';
+        } else if (char === '/') {
+          matrixCtx.fillStyle = highlight ? '#ffd166' : '#8b5cf6';
+        } else if (char === '#') {
+          matrixCtx.fillStyle = highlight ? '#ffd166' : '#06b6d4';
+        } else if (char === '@') {
+          matrixCtx.fillStyle = highlight ? '#ffd166' : '#f59e0b';
+        }
+        
+        matrixCtx.fillText(char, x, y);
+
+        if (y > window.innerHeight && Math.random() > 0.975) matrixDrops[i] = 0;
+        else matrixDrops[i]++;
+      }
+      if (matrixRunning) requestAnimationFrame(drawMatrixFrame);
+    }
+
+    function startMatrix() {
+      if (matrixRunning) return;
+      initMatrixSize();
+      matrixRunning = true;
+      requestAnimationFrame(drawMatrixFrame);
+    }
+
+    function stopMatrix() {
+      matrixRunning = false;
+    }
+
+    // Start matrix animation
+    startMatrix();
+
+    window.addEventListener('resize', () => {
+      const wasRunning = matrixRunning;
+      stopMatrix();
+      initMatrixSize();
+      if (wasRunning) { 
+        matrixRunning = true; 
+        requestAnimationFrame(drawMatrixFrame); 
+      }
+    });
+
+    // === Live Bitcoin Data ===
+    const blockElem = document.getElementById('block-height');
+    const mempoolElem = document.getElementById('mempool-count');
+    const avgFeeElem = document.getElementById('avg-fee');
+
+    async function fetchSnapshot() {
+      try {
+        const [blocksResp, mempoolResp] = await Promise.all([
+          fetch('https://mempool.space/api/blocks'),
+          fetch('https://mempool.space/api/mempool')
+        ]);
+        const blocks = await blocksResp.json();
+        const mempool = await mempoolResp.json();
+
+        if (blocks && blocks[0]) blockElem.textContent = blocks[0].height;
+        if (mempool && typeof mempool.count === 'number') mempoolElem.textContent = mempool.count.toLocaleString();
+      } catch (err) {
+        console.error('REST fetch error:', err);
+      }
+    }
+
+    function connectWS() {
+      const ws = new WebSocket('wss://mempool.space/api/v1/ws');
+      ws.onopen = () => ws.send(JSON.stringify({ action: "want", data: ["blocks", "mempool-blocks"] }));
+      ws.onmessage = e => {
+        try {
+          const d = JSON.parse(e.data);
+          if (d.block) blockElem.textContent = d.block.height;
+          if (d.mempoolInfo) {
+            const info = d.mempoolInfo;
+            if (typeof info.count === 'number') mempoolElem.textContent = info.count.toLocaleString();
+          }
+        } catch {}
+      };
+      ws.onclose = () => setTimeout(connectWS, 5000);
+    }
+
+    fetchSnapshot();
+    connectWS();
+    setInterval(fetchSnapshot, 60000);
+  })();
+  </script>
+
+</body>
+</html>
