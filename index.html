@@ -383,7 +383,12 @@
       align-items: center;
       gap: 8px;
       z-index: 1003;
-      pointer-events: none; /* do not block UI */
+      pointer-events: auto; /* allow clicks */
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    #mascot-container:hover {
+      transform: scale(1.1);
     }
     #mascot-container .bubble {
       position: relative;
@@ -564,8 +569,8 @@
     </div>
   </div>
 
-  <div id="mascot-container">
-    <div class="bubble">pet me</div>
+  <div id="mascot-container" onclick="window.open('foxjump/index.html', '_blank')">
+    <div class="bubble">up only</div>
     <img id="mascot-img" src="osmascot.png" alt="OS Mascot">
   </div>
 
