@@ -1,225 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile - Ordinal Strategy</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile | Ordinal Strategy</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #0b0c10;
-      color: #f1f1f1;
-      line-height: 1.6;
+    html, body { height: 100%; }
+    body { font-family: 'Inter', sans-serif; background: #0b0c10; color: #f1f1f1; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+
+    .title { font-size: 1.8rem; font-weight: 800; color: #f7931a; text-align: center; margin: 14px 0 4px; }
+    .subtitle { text-align: center; color: #aaa; margin-bottom: 16px; }
+
+    .glass { background: rgba(10, 12, 16, 0.28); border: 1px solid rgba(247, 147, 26, 0.18); border-radius: 16px; box-shadow: 0 6px 28px rgba(247,147,26,0.12), 0 2px 8px rgba(0,0,0,0.35); backdrop-filter: blur(6px) saturate(120%); -webkit-backdrop-filter: blur(6px) saturate(120%); }
+    .section { padding: 18px; margin: 14px 0; }
+
+    .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; }
+    .btn { background: #f7931a; color: #0b0c10; border: none; border-radius: 999px; padding: 10px 18px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 18px rgba(247,147,26,0.35); transition: transform 0.2s ease, filter 0.2s ease; }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .muted { color: #aaa; font-size: 0.9rem; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
+    .label { color: #f7931a; font-size: 0.85rem; margin-bottom: 4px; }
+    .value { color: #ffd166; font-variant-numeric: tabular-nums; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; align-items: start; margin-top: 10px; }
+
+    .list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
+    .card { padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+    .card a { color: #ffd166; word-break: break-all; }
+
+    header { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+    header .logo { display: flex; align-items: center; gap: 10px; }
+    header img { display: block; }
+    .brand-logo { height: 42px; width: auto; }
+    header a { color: #f1f1f1; text-decoration: none; }
+
+    /* ---------- RESPONSIVE: TABLET/MOBILE ---------- */
+    @media (max-width: 768px) {
+      .container { padding: 16px 12px 48px; }
+      .brand-logo { height: 36px; }
+      .title { font-size: 1.5rem; }
+      .subtitle { font-size: 0.95rem; }
+      .grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .list { grid-template-columns: 1fr 1fr; }
     }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    .logo {
-      margin-bottom: 20px;
-    }
-    .logo img {
-      height: 60px;
-      width: auto;
-    }
-    .profile-card {
-      background: rgba(0,0,0,0.35);
-      border: 1px solid rgba(247,147,26,0.45);
-      border-radius: 16px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
-    }
-    .profile-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .profile-image {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      margin-right: 20px;
-      border: 3px solid #f7931a;
-    }
-    .profile-info h2 {
-      color: #f7931a;
-      margin-bottom: 5px;
-    }
-    .profile-info p {
-      color: #ccc;
-      margin-bottom: 5px;
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
-      margin: 20px 0;
-    }
-    .stat-card {
-      background: rgba(255,255,255,0.05);
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-    }
-    .stat-number {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #f7931a;
-    }
-    .stat-label {
-      color: #ccc;
-      font-size: 0.9rem;
-      margin-top: 5px;
-    }
-    .back-btn {
-      background: #f7931a;
-      color: #0b0c10;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 24px;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-      margin-top: 20px;
-      transition: all 0.3s ease;
-    }
-    .back-btn:hover {
-      background: #fff;
-      transform: translateY(-2px);
-    }
-    .loading {
-      text-align: center;
-      color: #f7931a;
-    }
-    .error {
-      text-align: center;
-      color: #ef4444;
+    @media (max-width: 480px) {
+      header { gap: 8px; }
+      .brand-logo { height: 32px; }
+      .grid { grid-template-columns: 1fr; }
+      .list { grid-template-columns: 1fr; }
+      .title { font-size: 1.3rem; }
+      .subtitle { font-size: 0.9rem; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
+    <header>
       <div class="logo">
-        <img src="osfun.png" alt="Ordinal Strategy Logo">
+        <img class="brand-logo" src="osfun.png" alt="Ordinal Strategy Logo" />
       </div>
-      <h1>Your Profile</h1>
+      <a href="index.html">Home</a>
+    </header>
+
+    <h1 class="title">Your Bitcoin Profile</h1>
+    <p class="subtitle">Read-only connect. We only read your public address.</p>
+
+    <div class="glass section">
+      <div class="row">
+        <button id="connect-btn" class="btn">Connect Wallet</button>
+        <span id="status" class="muted"></span>
+      </div>
+      <div class="grid" id="wallet-grid" hidden>
+        <div>
+          <div class="label">Payment address</div>
+          <div id="payment-address" class="mono"></div>
+        </div>
+        <div>
+          <div class="label">Ordinals (taproot) address</div>
+          <div id="ordinals-address" class="mono"></div>
+        </div>
+        <div>
+          <div class="label">BTC balance</div>
+          <div id="btc-balance" class="value">--</div>
+        </div>
+        <div>
+          <div class="label">Inscriptions owned</div>
+          <div id="inscriptions-count" class="value">--</div>
+        </div>
+      </div>
     </div>
 
-    <div id="profile-content">
-      <div class="loading">
-        <p>Loading your profile...</p>
+    <div class="glass section">
+      <div class="row" style="justify-content: space-between;">
+        <div class="label">Recent inscriptions</div>
+        <div class="muted">Showing latest 12 (Hiro)</div>
       </div>
-    </div>
-
-    <div style="text-align: center;">
-      <a href="index.html" class="back-btn">← Back to Home</a>
+      <div id="inscriptions-list" class="list"></div>
     </div>
   </div>
 
   <script>
-    (function() {
-      const profileContent = document.getElementById('profile-content');
-      
-      // Get user data from localStorage
-      const userData = localStorage.getItem('os_user_data');
-      
-      if (!userData) {
-        profileContent.innerHTML = `
-          <div class="error">
-            <p>No profile data found. Please connect your Twitter account first.</p>
-            <a href="index.html" class="back-btn">Go Back</a>
-          </div>
-        `;
-        return;
+    (function(){
+      const connectBtn = document.getElementById('connect-btn');
+      const statusEl = document.getElementById('status');
+      const gridEl = document.getElementById('wallet-grid');
+      const payEl = document.getElementById('payment-address');
+      const ordEl = document.getElementById('ordinals-address');
+      const balEl = document.getElementById('btc-balance');
+      const cntEl = document.getElementById('inscriptions-count');
+      const listEl = document.getElementById('inscriptions-list');
+
+      function setStatus(t){ statusEl.textContent = t || ''; }
+
+      function pickFromBtcAddresses(addresses){
+        if (!Array.isArray(addresses) || addresses.length === 0) return { payment: null, ordinals: null };
+        const lower = addresses.map(a => ({ address: a.address || a, type: (a.type || '').toLowerCase() }));
+        const p2tr = lower.find(a => a.type === 'p2tr');
+        const p2wpkh = lower.find(a => a.type === 'p2wpkh');
+        const any = lower[0];
+        return { payment: (p2wpkh && p2wpkh.address) || any.address, ordinals: (p2tr && p2tr.address) || any.address };
       }
-      
-      try {
-        const user = JSON.parse(userData);
-        displayProfile(user);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        profileContent.innerHTML = `
-          <div class="error">
-            <p>Error loading profile data.</p>
-            <a href="index.html" class="back-btn">Go Back</a>
-          </div>
-        `;
+
+      async function fetchBalance(address){
+        try {
+          const r = await fetch(`https://mempool.space/api/address/${encodeURIComponent(address)}`);
+          if (!r.ok) throw new Error('mempool balance failed');
+          const j = await r.json();
+          const chain = (j?.chain_stats?.funded_txo_sum || 0) - (j?.chain_stats?.spent_txo_sum || 0);
+          const mem = (j?.mempool_stats?.funded_txo_sum || 0) - (j?.mempool_stats?.spent_txo_sum || 0);
+          const sats = chain + mem;
+          return sats / 1e8;
+        } catch {
+          return null;
+        }
       }
-      
-      function displayProfile(user) {
-        const connectedDate = new Date().toLocaleDateString();
-        
-        profileContent.innerHTML = `
-          <div class="profile-card">
-            <div class="profile-header">
-              <img src="${user.profileImageUrl || '/default-avatar.png'}" alt="Profile" class="profile-image">
-              <div class="profile-info">
-                <h2>${user.displayName || 'Twitter User'}</h2>
-                <p>@${user.username || 'username'}</p>
-                <p>Connected: ${connectedDate}</p>
-              </div>
-            </div>
-            
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-number">${user.followersCount || '0'}</div>
-                <div class="stat-label">Followers</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">${user.followingCount || '0'}</div>
-                <div class="stat-label">Following</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">${user.tweetCount || '0'}</div>
-                <div class="stat-label">Tweets</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">1</div>
-                <div class="stat-label">Lists</div>
-              </div>
-            </div>
-            
-            ${user.bio ? `
-              <div style="margin-top: 20px;">
-                <h3 style="color: #f7931a; margin-bottom: 10px;">Bio</h3>
-                <p>${user.bio}</p>
-              </div>
-            ` : ''}
-            
-            ${user.location ? `
-              <div style="margin-top: 15px;">
-                <h3 style="color: #f7931a; margin-bottom: 10px;">Location</h3>
-                <p>${user.location}</p>
-              </div>
-            ` : ''}
-            
-            ${user.website ? `
-              <div style="margin-top: 15px;">
-                <h3 style="color: #f7931a; margin-bottom: 10px;">Website</h3>
-                <p><a href="${user.website}" target="_blank" style="color: #f7931a;">${user.website}</a></p>
-              </div>
-            ` : ''}
-          </div>
-          
-          <div class="profile-card">
-            <h3 style="color: #f7931a; margin-bottom: 20px;">Welcome to Ordinal Strategy!</h3>
-            <div style="color: #ccc;">
-              <p>You've successfully connected your Twitter account to Ordinal Strategy.</p>
-              <p>This is your profile page where you can view your connected social information.</p>
-            </div>
-          </div>
-        `;
+
+      async function fetchInscriptionsCount(address){
+        try {
+          const r = await fetch(`https://api.hiro.so/ordinals/v1/inscriptions?address=${encodeURIComponent(address)}&limit=1`);
+          if (!r.ok) throw new Error('hiro count failed');
+          const j = await r.json();
+          return (typeof j?.total === 'number') ? j.total : null;
+        } catch { return null; }
       }
+
+      async function fetchInscriptionsList(address, limit=12){
+        try {
+          const r = await fetch(`https://api.hiro.so/ordinals/v1/inscriptions?address=${encodeURIComponent(address)}&order=desc&sort=inscription_number&limit=${limit}`);
+          if (!r.ok) throw new Error('hiro list failed');
+          const j = await r.json();
+          return Array.isArray(j?.results) ? j.results : [];
+        } catch { return []; }
+      }
+
+      function renderList(items){
+        listEl.innerHTML = '';
+        if (!items.length){
+          const empty = document.createElement('div');
+          empty.className = 'muted';
+          empty.textContent = 'No inscriptions found for this address.';
+          listEl.appendChild(empty);
+          return;
+        }
+        for (const it of items){
+          const card = document.createElement('div');
+          card.className = 'card';
+          const title = document.createElement('div');
+          title.className = 'label';
+          title.textContent = `#${it.inscription_number ?? it.number ?? '—'}`;
+          const link = document.createElement('a');
+          const id = it.id || it.inscription_id;
+          link.href = id ? `https://ordinals.com/inscription/${id}` : '#';
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = id || 'view';
+          card.appendChild(title);
+          card.appendChild(link);
+          listEl.appendChild(card);
+        }
+      }
+
+      async function connect(){
+        setStatus('Detecting wallet...');
+        // Xverse injects window.XverseProviders?.BitcoinProvider (EIP-1193-like)
+        const hasXverse = !!(window.XverseProviders && window.XverseProviders.BitcoinProvider);
+        const hasBtc = typeof window.btc !== 'undefined' && typeof window.btc.request === 'function';
+        const hasUnisat = typeof window.unisat !== 'undefined';
+        const hasOkx = typeof window.okxwallet !== 'undefined' && window.okxwallet.bitcoin && typeof window.okxwallet.bitcoin.request === 'function';
+
+        let payment=null, ordinals=null;
+        try {
+          if (hasXverse) {
+            // Try Xverse provider first
+            const provider = window.XverseProviders.BitcoinProvider;
+            try { await provider.request('requestAccounts'); } catch {}
+            const addrs = await provider.request('getAddresses');
+            ({ payment, ordinals } = pickFromBtcAddresses(addrs));
+            setStatus('Connected via Xverse');
+          } else if (hasBtc){
+            try { await window.btc.request('requestAccounts'); } catch {}
+            const addrs = await window.btc.request('getAddresses');
+            ({ payment, ordinals } = pickFromBtcAddresses(addrs));
+            setStatus('Connected via standard Bitcoin provider');
+          } else if (hasUnisat){
+            const accs = await window.unisat.requestAccounts();
+            const addr = Array.isArray(accs) ? accs[0] : null;
+            payment = addr; ordinals = addr;
+            setStatus('Connected via Unisat');
+          } else if (hasOkx){
+            try { await window.okxwallet.bitcoin.request({ method: 'requestAccounts' }); } catch {}
+            const accts = await window.okxwallet.bitcoin.request({ method: 'getAccounts' });
+            const addr = Array.isArray(accts) ? (accts[0]?.address || accts[0]) : null;
+            payment = addr; ordinals = addr;
+            setStatus('Connected via OKX Wallet');
+          } else {
+            setStatus('No compatible Bitcoin wallet found. Install Xverse/Leather/Unisat.');
+            return;
+          }
+        } catch (e){
+          setStatus('Connection failed.');
+          return;
+        }
+
+        if (!payment && !ordinals){
+          setStatus('Could not read addresses from wallet.');
+          return;
+        }
+
+        if (gridEl) gridEl.hidden = false;
+        payEl.textContent = payment || ordinals || '';
+        ordEl.textContent = ordinals || payment || '';
+
+        const [btc, count, list] = await Promise.all([
+          fetchBalance(payment || ordinals),
+          fetchInscriptionsCount(ordinals || payment),
+          fetchInscriptionsList(ordinals || payment, 12)
+        ]);
+        balEl.textContent = (typeof btc === 'number') ? `${btc.toFixed(8)} BTC` : '--';
+        cntEl.textContent = (typeof count === 'number') ? count.toLocaleString() : '--';
+        renderList(list);
+      }
+
+      connectBtn.addEventListener('click', connect);
     })();
   </script>
 </body>
